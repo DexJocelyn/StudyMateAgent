@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#f7f8fa"><title>课伴 · 任务与日程</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23334155'/%3E%3Cpath d='M9 10h14M9 16h10M9 22h6' stroke='white' stroke-width='3'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="/static/styles.css?v=20261024-weather"><script type="module" src="/static/app.js?v=20261024-weather"></script>
+</head>
+<body>
+  <main>
+    <header class="app-header"><div class="brand"><h1>课伴</h1><span>任务与日程</span></div><nav aria-label="项目操作"><button class="button secondary" id="nav-members">成员</button><button class="button secondary" id="nav-prefs">设置空闲时间</button><button class="button secondary" id="nav-export">导出计划</button><button class="button secondary" id="new-session">新建对话</button></nav></header>
+    <div class="project-bar"><label for="project-select">当前项目</label><select id="project-select" aria-label="切换项目"><option value="project_demo">软件工程 · 课伴项目</option></select><button class="text-button" id="new-project">新建项目</button></div>
+    <div class="identity-bar"><label for="current-member">当前聊天成员</label><select id="current-member" aria-label="切换聊天成员"><option value="">请选择你的姓名</option></select><span id="identity-note">选择成员后再与 AI 对话</span></div>
+    <div class="mode-banner" id="mode-banner"><span id="mode-text">正在连接…</span></div>
+    <section class="work-grid">
+      <section class="chat-panel panel" aria-label="智能体对话">
+        <div class="panel-header"><h2 id="chat-title">对话</h2><span class="muted" id="chat-mode">连接中</span></div>
+        <div class="chat-stream" id="chat-stream" aria-live="polite"></div><div id="draft-container"></div>
+        <div class="quick-actions"><button data-prompt="拆解演示作业">拆解示例作业</button><button data-prompt="安排日程">安排日程</button></div>
+        <form id="chat-form" class="composer"><label class="sr-only" for="message">输入作业或指令</label><textarea id="message" rows="3" maxlength="20000" placeholder="输入作业要求，或说出要创建、修改的任务"></textarea>
+          <div id="voice-panel" class="voice-panel" hidden><div class="voice-heading"><span id="voice-status" role="status">语音输入</span><span id="voice-time" aria-label="本次聆听时长">00:00</span></div><p id="voice-hint"></p><p id="voice-preview" hidden></p></div>
+          <div class="composer-bottom"><div><button type="button" id="mic" class="text-button" aria-label="开始中文语音输入" aria-pressed="false">语音输入</button><button type="button" id="pause-mic" class="text-button" hidden>暂停</button><button type="button" id="stop-speech" class="text-button">停止朗读</button></div><button id="send" class="button primary" type="submit">发送</button></div></form>
+        <div class="composer-note" id="input-note">Enter 发送 · Shift + Enter 换行</div><button id="retry" class="retry-button" hidden>连接中断，重试同一请求</button>
+      </section>
+      <section class="board-panel panel" aria-label="项目任务与日程">
+        <div class="panel-header"><div class="tabs" role="tablist"><button role="tab" aria-selected="true" class="tab active" data-tab="tasks">任务 <span id="task-count">0</span></button><button role="tab" aria-selected="false" class="tab" data-tab="schedule">日程</button></div><button class="text-button" id="refresh" aria-label="刷新真实数据">刷新</button></div>
+        <div class="task-summary" aria-label="项目统计"><span>共 <strong id="stat-all">0</strong> 项</span><span>进行中 <strong id="stat-doing">0</strong></span><span>完成 <strong id="stat-done">0</strong></span><span>剩余预计 <strong id="stat-hours">0</strong> 小时</span></div>
+        <div class="board-filters"><div class="status-filters" id="status-filters"><button data-status="all" class="selected">全部</button><button data-status="todo">待开始</button><button data-status="doing">进行中</button><button data-status="paused">已暂停</button><button data-status="done">已完成</button></div><select id="member-filter" aria-label="按成员筛选"><option value="">所有成员</option></select></div>
+        <div class="board-body" id="board-body"></div><div class="board-footer"><span id="sync-status">等待同步</span><span id="schedule-version">日程 v0</span></div>
+      </section>
+    </section>
+  </main>
+  <dialog id="project-dialog"><form id="project-form">
+    <div class="dialog-header"><h2>新建项目</h2><button type="button" class="icon-button" id="close-project" aria-label="关闭新建项目">×</button></div>
+    <p class="muted">先填你自己，再添加一起做作业的同学。之后也可以随时调整。</p>
+    <label class="field-label" for="project-name">项目名称</label><input id="project-name" required maxlength="80" placeholder="例如：数据库课程小组">
+    <label class="field-label" for="project-self-name">你的姓名或昵称 <span class="self-badge">你</span></label><input id="project-self-name" required maxlength="60" placeholder="例如：小林" autocomplete="nickname" aria-describedby="project-self-note">
+    <p class="dialog-note" id="project-self-note">创建后会以这个身份与 AI 对话。</p>
+    <div class="project-team-heading"><h3>小组成员 <span id="project-team-count">1 人（含你）</span></h3><span class="muted">选填</span></div>
+    <div id="project-teammates"></div>
+    <p class="muted" id="project-team-empty">一个人也能用；有组员时再添加。</p>
+    <button type="button" id="add-project-member" class="button secondary">＋ 添加组员</button>
+    <p class="dialog-note">填写名单不会向组员发送邀请。</p>
+    <div class="dialog-actions"><button type="button" class="button secondary" id="cancel-project">取消</button><button class="button primary" id="create-project" type="submit">创建并进入</button></div>
+  </form></dialog>
+  <dialog id="members-dialog"><div class="dialog-header"><h2>项目成员 <span id="members-count"></span></h2><button type="button" class="icon-button" id="close-members" aria-label="关闭成员管理">×</button></div><p class="muted">可以单人使用，也可以添加或移除成员。分工按当前成员安排。</p><div id="members-list"></div><form id="add-member-form" class="member-add"><label class="sr-only" for="new-member-name">新成员姓名</label><input id="new-member-name" maxlength="60" required placeholder="输入新成员姓名"><button class="button primary" type="submit">添加成员</button></form><p class="dialog-note">有任务的成员需先在任务列表中转交任务，再移除；至少保留一人。</p></dialog>
+  <dialog id="prefs-dialog"><form id="prefs-form"><div class="dialog-header"><h2>成员空闲时间</h2><button type="button" class="icon-button" id="close-prefs" aria-label="关闭">×</button></div><p class="muted">为成员添加明确的空闲时段，系统会据此安排任务。</p><label class="field-label" for="prefs-member">成员</label><select id="prefs-member"></select><div id="windows-list"></div><button type="button" id="add-window" class="text-button add-window">添加时段</button><p class="dialog-note">时间均为北京时间。保存会替换该成员的全部空闲时段。</p><div class="dialog-actions"><button type="button" class="button secondary" id="cancel-prefs">取消</button><button class="button primary" type="submit">保存</button></div></form></dialog>
+  <div class="toast" id="toast" role="status" hidden></div>
+</body></html>

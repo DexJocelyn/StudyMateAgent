@@ -1,0 +1,57 @@
+{
+  "executed_at": "2026-10-20T21:43:44.472334+08:00",
+  "model": "qwen-plus",
+  "real_provider": true,
+  "database": "temporary",
+  "transport": "MCP stdio",
+  "steps": [
+    {
+      "input": "请直接创建一条任务，不需要草案：标题为「模型联调验收」，负责人是测试同学，预计30分钟，截止时间为北京时间2026-10-23 22:00。请实际调用工具保存。",
+      "ok": true,
+      "reply": "任务「模型联调验收」已成功创建，具体信息如下：\n- 标题：模型联调验收\n- 负责人：测试同学\n- 预计耗时：30分钟\n- 截止时间：北京时间2026-10-23 22:00\n- 任务ID：task_45c94671632b4fea\n\n如需为该任务安排具体执行时间，或进行其他操作，请随时告诉我。",
+      "events": [
+        {
+          "name": "get_plan",
+          "status": "success",
+          "summary": "执行成功",
+          "transport": "MCP stdio"
+        },
+        {
+          "name": "create_tasks",
+          "status": "success",
+          "summary": "返回 1 项",
+          "transport": "MCP stdio"
+        }
+      ],
+      "error": null
+    },
+    {
+      "input": "把它标记为已完成，然后导出当前项目计划。请实际执行两个操作。",
+      "ok": true,
+      "reply": "当前项目计划已成功导出为 Markdown 文件：\n- 文件名：StudyMate-20261020-214356.md\n- 下载链接：/api/downloads/file_5199229c4f5a4003\n\n任务「模型联调验收」现已标记为已完成状态。",
+      "events": [
+        {
+          "name": "update_task",
+          "status": "success",
+          "summary": "执行成功",
+          "transport": "MCP stdio"
+        },
+        {
+          "name": "export_plan",
+          "status": "success",
+          "summary": "执行成功",
+          "transport": "MCP stdio"
+        }
+      ],
+      "error": null
+    }
+  ],
+  "passed": true,
+  "checks": [
+    "真实模型选择工具",
+    "MCP创建任务",
+    "SQLite核对",
+    "多轮指代完成任务",
+    "MCP导出与附件核对"
+  ]
+}

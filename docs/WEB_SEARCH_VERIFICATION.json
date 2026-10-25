@@ -1,0 +1,160 @@
+{
+  "executed_at": "2026-10-24T01:16:40.886851+08:00",
+  "model": "qwen-plus",
+  "real_model": true,
+  "real_search_provider": "tavily",
+  "database": "temporary",
+  "passed": true,
+  "semantic_review": "retrieval_and_honest_uncertainty_verified_with_limits",
+  "steps": [
+    {
+      "label": "一般资料检索",
+      "input": "请联网搜索Python官方关于venv虚拟环境的说明，用中文给出两点解释并引用实际来源。不要创建任务。",
+      "ok": true,
+      "reply": "根据 Python 官方中文文档（3.11.17 版）[venv — 创建虚拟环境](https://docs.python.org/zh-tw/3.11/library/venv.html)，关于 `venv` 的两点核心解释如下：\n\n1. **轻量级、隔离的运行环境**：`venv` 是 Python 3.3 起内置的标准库模块，用于创建“轻量级虚拟环境”，每个环境拥有独立的 Python 解释器副本、专用的 `pip` 和独立的第三方包安装路径（位于 `site-packages`），默认与系统全局 Python 及其他虚拟环境完全隔离，避免依赖冲突。\n\n2. **可丢弃、不可迁移的设计原则**：虚拟环境被视为“可丢弃性”（disposable）资源——应能随时删除并从 `requirements.txt` 或 `pyproject.toml` 重建；它不支持直接移动或复制到另一台机器或目录，因为其内部路径和链接是相对于创建位置硬编码的，跨路径使用会导致失效 [来源标题](https://docs.python.org/zh-tw/3.11/library/venv.html)。",
+      "events": [
+        {
+          "name": "web_search",
+          "label": "联网搜索公开网页",
+          "status": "success",
+          "summary": "找到 5 条网页来源",
+          "transport": "MCP stdio"
+        }
+      ],
+      "sources": [
+        {
+          "title": "venv --- 创建虚拟环境 — Python 3.11.17 說明文件",
+          "url": "https://docs.python.org/zh-tw/3.11/library/venv.html",
+          "retrieved_at": "2026-10-24T01:16:42.601130+08:00",
+          "published_at": null
+        },
+        {
+          "title": "Python虚拟环境完全指南：venv与conda选择及版本管理实战",
+          "url": "https://bbs.csdn.net/weixin_29611239/article/details/100644692",
+          "retrieved_at": "2026-10-24T01:16:42.601130+08:00",
+          "published_at": null
+        },
+        {
+          "title": "Python 环境与虚拟环境",
+          "url": "https://yuluyao.com/misc/python-env",
+          "retrieved_at": "2026-10-24T01:16:42.601130+08:00",
+          "published_at": null
+        },
+        {
+          "title": "树莓派OS | Raspberry Pi 树莓派 (官网26年09月更新)",
+          "url": "https://pidoc.cn/docs/computers/os",
+          "retrieved_at": "2026-10-24T01:16:42.601130+08:00",
+          "published_at": null
+        },
+        {
+          "title": "设置 Python 开发环境  |  Google Cloud Documentation",
+          "url": "https://docs.cloud.google.com/python/docs/setup?hl=zh-cn",
+          "retrieved_at": "2026-10-24T01:16:42.601130+08:00",
+          "published_at": null
+        }
+      ],
+      "changed_ids": {
+        "tasks": [],
+        "schedule": [],
+        "preferences": [],
+        "members": []
+      },
+      "error": null,
+      "seconds": 10.23
+    },
+    {
+      "label": "当前信息检索",
+      "input": "请联网查询Python官网当前下载页列出的最新稳定Python版本，给出来源。如果结果不能确认最新版本，请如实说明。不要创建任务。",
+      "ok": true,
+      "reply": "本次搜索未找到 Python 官网（python.org）下载页面的**一手实时快照**，所有结果均为第三方技术博客或文档中提及的版本信息（如“3.12.x”“3.13.13”“3.14”等），但均**未明确标注其来源为 python.org 官方下载页当前展示内容**，也未提供可验证的官网截图、HTML 片段或直接 URL。\n\n尤其需注意：\n- 多个结果提到 “3.12” 或 “3.13”，但未说明是官网「最新稳定版」还是「推荐生产版」；\n- 有内容提及 “3.14”，但无任何结果显示该版本已在 python.org 下载页正式发布并标记为 *Stable*；\n- 检索时间（2026-10-24）与 Python 惯例发布时间（每年 10 月第一个星期四）接近，但**缺乏来自 python.org/download/ 页面本身的权威确认**。\n\n✅ 可确认的事实：  \nPython 官网下载页地址为 https://www.python.org/downloads/，其最新稳定版始终在页面顶部显著位置标出（如 “Download Python 3.x.x” 按钮）。  \n\n❌ 本轮搜索**无法确认截至 2026-10-24 的最新稳定版本号**，因未检索到 python.org 域名下、带有明确发布时间和版本标识的官方下载页内容。\n\n建议：如需确切版本，请直接访问 [https://www.python.org/downloads/](https://www.python.org/downloads/) 查看实时页面。",
+      "events": [
+        {
+          "name": "web_search",
+          "label": "联网搜索公开网页",
+          "status": "success",
+          "summary": "找到 5 条网页来源",
+          "transport": "MCP stdio"
+        }
+      ],
+      "sources": [
+        {
+          "title": "2026年Python开发环境搭建全指南：解释器、PyCharm与虚拟环境",
+          "url": "https://bbs.csdn.net/weixin_31236101/article/details/100627154",
+          "retrieved_at": "2026-10-24T01:16:53.491136+08:00",
+          "published_at": null
+        },
+        {
+          "title": "DeepInfer 部署完整指南（2026 年 10 月）：Python 3.12、CUDA 13/CANN 9.2 与离线推理 | 七牛云",
+          "url": "https://news.qiniu.com/archives/1792633953810",
+          "retrieved_at": "2026-10-24T01:16:53.491136+08:00",
+          "published_at": null
+        },
+        {
+          "title": "问题 - Microsoft Q&A",
+          "url": "https://learn.microsoft.com/zh-cn/answers/questions",
+          "retrieved_at": "2026-10-24T01:16:53.491136+08:00",
+          "published_at": null
+        },
+        {
+          "title": "Microsoft SQL Server 2017 RTM GDR & CU31 (2026 年 7 月安全更新) - sysin",
+          "url": "https://sysin.org/blog/sql-server-2017",
+          "retrieved_at": "2026-10-24T01:16:53.491136+08:00",
+          "published_at": null
+        },
+        {
+          "title": "DeepSeek Harness、Claude Code 与 Omnigent 怎么选？",
+          "url": "https://www.ssdnodes.com/learn/lang/zh-hans/dsh-vs-claude-code-vs-omnigent",
+          "retrieved_at": "2026-10-24T01:16:53.491136+08:00",
+          "published_at": null
+        }
+      ],
+      "changed_ids": {
+        "tasks": [],
+        "schedule": [],
+        "preferences": [],
+        "members": []
+      },
+      "error": null,
+      "seconds": 14.08
+    },
+    {
+      "label": "普通聊天不搜索",
+      "input": "谢谢，今天有点累，我们就随便聊聊，不要搜索或安排任务。",
+      "ok": true,
+      "reply": "不客气～听你这么说，今天确实辛苦了 😊  \n放松一下挺好，不用赶进度、也不用查资料，就随便说说话。  \n想聊什么都可以：最近看到的有趣事、喜欢的音乐电影、发呆时冒出的奇怪念头……或者干脆安静地喘口气，我在这儿陪着。\n\n需要的时候，随时喊我～ 🌙",
+      "events": [],
+      "sources": [],
+      "changed_ids": {
+        "tasks": [],
+        "schedule": [],
+        "preferences": [],
+        "members": []
+      },
+      "error": null,
+      "seconds": 3.33
+    }
+  ],
+  "search_attempts": 2,
+  "structural_passed": true,
+  "browser_demo": {
+    "data_path": "data/verification/search-20261024-011708-663444",
+    "project_id": "project_40cd7ee589bd4084",
+    "member_id": "member_19a45fa301a24f4d",
+    "session_id": "session_bef86f9363d34060"
+  },
+  "seconds": 27.86,
+  "manual_review": {
+    "general_retrieval_passed": true,
+    "source_links_restored": true,
+    "ordinary_chat_no_search": true,
+    "latest_version_answered": false,
+    "freshness_refusal_passed": true,
+    "notes": "一般资料检索引用了实际返回的官方venv文档。最新版本问题未找到足够一手证据，复验不再给确定的旧版结论；没有验证出正确最新版本，不能宣称最新信息查询全部准确。回复仍较冗长并有附加推测，来源和总结需人工核实。原任务数据未变。"
+  },
+  "browser_check": {
+    "source_cards": true,
+    "reload_restores_sources": true,
+    "official_link_href_verified": true,
+    "screenshot": "screenshots/web-search-sources.png"
+  }
+}

@@ -1,0 +1,24 @@
+.venv/
+__pycache__/
+.pytest_cache/
+.env
+.env.*
+!.env.example
+data/
+dist/
+*.pyc
+node_modules/
+.tools/
+.DS_Store
+
+# 本机工作资料和运行产物
+jpg/
+*.textClipping
+*.log
+*.sqlite
+*.sqlite3
+*.sqlite3-wal
+*.sqlite3-shm
+.codex/
+.agents/
+/docs/课伴StudyMate_本科背景调查项目经历.md

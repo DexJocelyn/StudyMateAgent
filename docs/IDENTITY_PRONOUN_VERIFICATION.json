@@ -1,0 +1,221 @@
+{
+  "executed_at": "2026-10-22T11:48:18.205404+08:00",
+  "model": "qwen-plus",
+  "database": "temporary",
+  "real_provider": true,
+  "passed": true,
+  "seeded_history_is_fixture": true,
+  "steps": [
+    {
+      "label": "缺截止时间时只澄清时间",
+      "input": "帮我创建一个nosql学习的任务，预计6小时。",
+      "reply": "好的，我将为您（甲）创建一个“NoSQL 学习”任务，预计耗时 6 小时（即 360 分钟）。但任务需明确截止时间（日期 + 具体时刻，北京时间），才能完成创建。\n\n请问该任务的**最晚完成时间**是？例如：2026-10-25 22:00 或 “下周五下午” 等。",
+      "ok": true,
+      "events": [],
+      "changed_ids": {
+        "tasks": [],
+        "schedule": [],
+        "preferences": [],
+        "members": []
+      },
+      "error": null
+    },
+    {
+      "label": "沿用当前身份完成创建",
+      "input": "截止北京时间2026-10-25 22:00，其他按刚才的要求，请直接保存。",
+      "reply": "✅ 已成功为您（甲）创建任务：\n\n- **任务标题**：NoSQL 学习  \n- **负责人**：甲  \n- **截止时间**：2026-10-25 22:00（北京时间）  \n- **预估耗时**：6 小时（360 分钟）  \n- **当前状态**：待开始（todo）\n\n如需为该任务安排具体学习时段（例如拆解为“概念理解 + MongoDB 实操 + 文档建模练习”等子项并排日程），或设置您的可用时间偏好（如每天仅晚上 19:00–22:00 可学），请随时告诉我，我可立即协助。",
+      "ok": true,
+      "events": [
+        {
+          "name": "create_tasks",
+          "status": "success",
+          "summary": "返回 1 项",
+          "transport": "MCP stdio"
+        }
+      ],
+      "changed_ids": {
+        "tasks": [
+          "task_cea809fb7bb44d6f"
+        ],
+        "schedule": [],
+        "preferences": [],
+        "members": []
+      },
+      "error": null
+    },
+    {
+      "label": "代词给我归甲",
+      "input": "再给我直接创建任务「接口联调」，预计30分钟，截止北京时间2026-10-25 22:00。",
+      "reply": "✅ 已成功为您（甲）创建第二项任务：\n\n- **任务标题**：接口联调  \n- **负责人**：甲  \n- **截止时间**：2026-10-25 22:00（北京时间）  \n- **预估耗时**：30 分钟  \n- **当前状态**：待开始（todo）\n\n目前您名下共有两项待办任务，均截止于同一时间点：\n- NoSQL 学习（360 分钟）  \n- 接口联调（30 分钟）  \n\n如需我帮您：\n- ✅ 拆解任一任务为更细颗粒的子任务（例如分步骤、配资源链接），  \n- ✅ 查询您当前是否已设置可用时间偏好（以便后续智能排程），  \n- ✅ 生成这两项任务的候选日程草案（自动避开冲突、按优先级分配时段），  \n\n请直接告诉我，我将立即执行。",
+      "ok": true,
+      "events": [
+        {
+          "name": "create_tasks",
+          "status": "success",
+          "summary": "返回 1 项",
+          "transport": "MCP stdio"
+        }
+      ],
+      "changed_ids": {
+        "tasks": [
+          "task_457ea2c2121f4d7f"
+        ],
+        "schedule": [],
+        "preferences": [],
+        "members": []
+      },
+      "error": null
+    },
+    {
+      "label": "省略负责人默认当前甲",
+      "input": "直接创建任务「撰写复盘」，预计30分钟，截止北京时间2026-10-25 22:00。",
+      "reply": "✅ 已成功为您（甲）创建第三项任务：\n\n- **任务标题**：撰写复盘  \n- **负责人**：甲  \n- **截止时间**：2026-10-25 22:00（北京时间）  \n- **预估耗时**：30 分钟  \n- **当前状态**：待开始（todo）\n\n📌 当前您名下共 **3 项待办任务**，全部截止于 **2026-10-25 22:00**：\n- NoSQL 学习（360 分钟）  \n- 接口联调（30 分钟）  \n- 撰写复盘（30 分钟）  \n→ **总预估工时：420 分钟（7 小时）**\n\n如需我帮您：\n- 🔍 查询您是否已设置每日可用时间段（例如“每天 19:00–22:00 可学习”），以便精准排程；  \n- 📅 自动生成这三项任务的**可行日程草案**（按截止优先、智能分配时段、避开冲突）；  \n- 🧩 将某项任务（如“NoSQL 学习”）进一步拆解为带子目标、资源链接、检查点的详细学习计划；  \n\n请随时告诉我您的下一步需求。",
+      "ok": true,
+      "events": [
+        {
+          "name": "create_tasks",
+          "status": "success",
+          "summary": "返回 1 项",
+          "transport": "MCP stdio"
+        }
+      ],
+      "changed_ids": {
+        "tasks": [
+          "task_a117347a59284ef3"
+        ],
+        "schedule": [],
+        "preferences": [],
+        "members": []
+      },
+      "error": null
+    },
+    {
+      "label": "明确姓名我时归另一位成员",
+      "input": "给姓名为“我”的那位成员直接创建任务「字面姓名任务」，预计30分钟，截止北京时间2026-10-25 22:00。我当前聊天身份仍是甲，不是切换身份。",
+      "reply": "✅ 已成功创建任务「字面姓名任务」，并明确分配给**姓名为“我”的成员**（`member_773ac794115c4ac1`）：\n\n- **任务标题**：字面姓名任务  \n- **负责人**：成员「我」（非当前发言者甲）  \n- **截止时间**：2026-10-25 22:00（北京时间）  \n- **预估耗时**：30 分钟  \n- **当前状态**：待开始（todo）\n\n📌 当前项目任务总览（按负责人分组）：\n- **甲（您）名下 3 项**：NoSQL 学习（360min）、接口联调（30min）、撰写复盘（30min）  \n- **成员「我」名下 1 项**：字面姓名任务（30min）\n\n如需进一步操作，例如：\n- 🔁 为成员「我」设置可用时间偏好（以便后续为其排程），  \n- 📋 查询该成员当前所有任务（`list_tasks` 筛选 `assignee_id=member_773ac794115c4ac1`），  \n- ⏱️ 为全部 4 项任务统一生成**跨成员日程草案**（含甲与「我」的协同时段安排），  \n\n请随时告诉我。",
+      "ok": true,
+      "events": [
+        {
+          "name": "get_plan",
+          "status": "success",
+          "summary": "执行成功",
+          "transport": "MCP stdio"
+        },
+        {
+          "name": "create_tasks",
+          "status": "success",
+          "summary": "返回 1 项",
+          "transport": "MCP stdio"
+        }
+      ],
+      "changed_ids": {
+        "tasks": [
+          "task_a654e562eeac4639"
+        ],
+        "schedule": [],
+        "preferences": [],
+        "members": []
+      },
+      "error": null
+    },
+    {
+      "label": "我的任务只查当前甲",
+      "input": "查看我的任务，只列出属于当前聊天成员的任务。",
+      "reply": "✅ 当前属于您（**甲**）的任务共 **3 项**，全部状态为「待开始」（todo）：\n\n| 序号 | 任务标题     | 截止时间             | 预估耗时 | ID                   |\n|------|--------------|----------------------|----------|----------------------|\n| 1    | 接口联调     | 2026-10-25 22:00     | 30 分钟  | `task_457ea2c2121f4d7f` |\n| 2    | 撰写复盘     | 2026-10-25 22:00     | 30 分钟  | `task_a117347a59284ef3` |\n| 3    | NoSQL 学习   | 2026-10-25 22:00     | 360 分钟（6 小时） | `task_cea809fb7bb44d6f` |\n\n⚠️ 注意：  \n- 任务「字面姓名任务」已明确分配给成员「我」，**不在此列表中**，符合您的要求（仅列出当前聊天成员甲的任务）。  \n- 所有任务截止时间相同，总预估工时 420 分钟（7 小时），建议尽早规划时段。\n\n如需我帮您：\n- 📅 为这 3 项任务生成**可采用的日程草案**（自动排入您可用时间、按优先级排序），  \n- 🧩 将“NoSQL 学习”拆解为带子步骤、资源链接、检查点的详细学习计划，  \n- ⏳ 查询您是否已设置每日可用时间段（如“每晚 19:00–22:00 可用”），以便精准排程，  \n\n请随时告诉我。",
+      "ok": true,
+      "events": [
+        {
+          "name": "list_tasks",
+          "status": "success",
+          "summary": "返回 3 项",
+          "transport": "MCP stdio"
+        }
+      ],
+      "changed_ids": {
+        "tasks": [],
+        "schedule": [],
+        "preferences": [],
+        "members": []
+      },
+      "error": null
+    }
+  ],
+  "checks": [
+    "缺截止时间时只澄清时间 HTTP成功",
+    "缺截止时间时只澄清时间 接口业务成功",
+    "缺截止时间时未擅自创建任务",
+    "只缺日期时确实询问截止信息",
+    "没有重复询问给自己还是给甲",
+    "不再次要求确认已绑定的身份或默认负责人",
+    "沿用当前身份完成创建 HTTP成功",
+    "沿用当前身份完成创建 接口业务成功",
+    "补齐时间后NoSQL六小时任务归甲",
+    "代词给我归甲 HTTP成功",
+    "代词给我归甲 接口业务成功",
+    "省略负责人默认当前甲 HTTP成功",
+    "省略负责人默认当前甲 接口业务成功",
+    "明确姓名我时归另一位成员 HTTP成功",
+    "明确姓名我时归另一位成员 接口业务成功",
+    "接口联调 真实负责人正确",
+    "撰写复盘 真实负责人正确",
+    "字面姓名任务 真实负责人正确",
+    "共四项任务无重复或多余创建",
+    "我的任务只查当前甲 HTTP成功",
+    "我的任务只查当前甲 接口业务成功",
+    "我的任务使用甲的ID过滤真实查询"
+  ],
+  "final_tasks": [
+    {
+      "id": "task_457ea2c2121f4d7f",
+      "project_id": "project_3c1cec94a9f2424d",
+      "title": "接口联调",
+      "description": "",
+      "assignee_id": "member_6eeb13d2ee704016",
+      "deadline": "2026-10-25T22:00:00+08:00",
+      "estimated_minutes": 30,
+      "status": "todo"
+    },
+    {
+      "id": "task_a117347a59284ef3",
+      "project_id": "project_3c1cec94a9f2424d",
+      "title": "撰写复盘",
+      "description": "",
+      "assignee_id": "member_6eeb13d2ee704016",
+      "deadline": "2026-10-25T22:00:00+08:00",
+      "estimated_minutes": 30,
+      "status": "todo"
+    },
+    {
+      "id": "task_cea809fb7bb44d6f",
+      "project_id": "project_3c1cec94a9f2424d",
+      "title": "NoSQL 学习",
+      "description": "",
+      "assignee_id": "member_6eeb13d2ee704016",
+      "deadline": "2026-10-25T22:00:00+08:00",
+      "estimated_minutes": 360,
+      "status": "todo"
+    },
+    {
+      "id": "task_a654e562eeac4639",
+      "project_id": "project_3c1cec94a9f2424d",
+      "title": "字面姓名任务",
+      "description": "",
+      "assignee_id": "member_773ac794115c4ac1",
+      "deadline": "2026-10-25T22:00:00+08:00",
+      "estimated_minutes": 30,
+      "status": "todo"
+    }
+  ],
+  "members": [
+    {
+      "id": "member_6eeb13d2ee704016",
+      "project_id": "project_3c1cec94a9f2424d",
+      "name": "甲"
+    },
+    {
+      "id": "member_773ac794115c4ac1",
+      "project_id": "project_3c1cec94a9f2424d",
+      "name": "我"
+    }
+  ]
+}

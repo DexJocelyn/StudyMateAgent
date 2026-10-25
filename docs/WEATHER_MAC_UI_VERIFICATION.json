@@ -1,0 +1,70 @@
+{
+  "executed_at": "2026-10-24T14:45:32.512195+08:00",
+  "surface": "Mac真实8000网页，非临时验收服务",
+  "input": "今天广州天气如何",
+  "reply": "广州当前天气：局部多云，气温 31.5°C，体感温度约 31.9°C，湿度 38%，风速 12.6 km/h。  \n今明两日预报：  \n- 今天（10月24日）：最高温 31.6°C，最低温 21.8°C，降水概率 0%；  \n- 明天（10月25日）：最高温 31.5°C，最低温 22.1°C，降水概率仍为 0%。  \n\n数据来源：Open-Meteo 数值天气模型估计（非现场实测），有效时间为 2026-10-24 14:30 北京时间。",
+  "events": [
+    {
+      "label": "查询城市天气",
+      "name": "get_weather",
+      "status": "success",
+      "summary": "已取得天气模型数据（非现场实测）",
+      "transport": "MCP stdio"
+    }
+  ],
+  "weather_tool_result": {
+    "apparent_temperature_c": 31.9,
+    "condition": "局部多云",
+    "data_kind": "数值天气模型估计，不是现场传感器实测；日最高降水概率不等于整天下雨。",
+    "data_time": "2026-10-24T14:30:00+08:00",
+    "forecast": [
+      {
+        "date": "2026-10-24",
+        "precipitation_probability_max_percent": 0,
+        "temperature_max_c": 31.6,
+        "temperature_min_c": 21.8
+      },
+      {
+        "date": "2026-10-25",
+        "precipitation_probability_max_percent": 0,
+        "temperature_max_c": 31.5,
+        "temperature_min_c": 22.1
+      }
+    ],
+    "fresh": true,
+    "freshness_note": "时间匹配",
+    "humidity_percent": 38,
+    "location": {
+      "country": "中国",
+      "country_code": "CN",
+      "latitude": 23.11667,
+      "location_id": 1809858,
+      "longitude": 113.25,
+      "name": "广州",
+      "region": "广东"
+    },
+    "needs_selection": false,
+    "provider": "Open-Meteo",
+    "retrieved_at": "2026-10-24T14:44:26.839584+08:00",
+    "source": {
+      "title": "Open-Meteo 天气数据（CC BY 4.0）",
+      "url": "https://api.open-meteo.com/v1/forecast?latitude=23.11667&longitude=113.25&current=temperature_2m%2Capparent_temperature%2Crelative_humidity_2m%2Cweather_code%2Cwind_speed_10m&daily=temperature_2m_max%2Ctemperature_2m_min%2Cprecipitation_probability_max&forecast_days=2&timezone=auto&temperature_unit=celsius&wind_speed_unit=kmh"
+    },
+    "temperature_c": 31.5,
+    "timezone": "Asia/Shanghai",
+    "weather_code": 2,
+    "wind_speed_kmh": 12.6
+  },
+  "sources": [
+    {
+      "published_at": null,
+      "retrieved_at": "2026-10-24T14:44:26.839584+08:00",
+      "title": "Open-Meteo 天气数据（CC BY 4.0）",
+      "url": "https://api.open-meteo.com/v1/forecast?latitude=23.11667&longitude=113.25&current=temperature_2m%2Capparent_temperature%2Crelative_humidity_2m%2Cweather_code%2Cwind_speed_10m&daily=temperature_2m_max%2Ctemperature_2m_min%2Cprecipitation_probability_max&forecast_days=2&timezone=auto&temperature_unit=celsius&wind_speed_unit=kmh"
+    }
+  ],
+  "task_count": 0,
+  "passed": true,
+  "screenshot": "docs/screenshots/weather-mac-natural.png",
+  "rog_status": "用户确认ROG已更新并重启，但ROG实际工具发现与调用记录尚未取得，失败原因未确定。"
+}

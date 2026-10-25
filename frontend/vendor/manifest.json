@@ -1,0 +1,18 @@
+[
+  {
+    "package": "marked",
+    "version": "18.1.1",
+    "source": "https://registry.npmjs.org/marked/-/marked-18.1.1.tgz",
+    "integrity": "sha512-zEGgrtUG8crk+TrMacJSVABU4DYDDkS8uqgU3ohrn/2fW9C2AEfUrO3m6IhpIpQpl7YcVpiXXC9cSMWDANT3dg==",
+    "file": "marked.esm.js",
+    "sha256": "930457e5d55439f90465015cc507d3323366e80df5f7a701b61189d4e1046bda"
+  },
+  {
+    "package": "dompurify",
+    "version": "3.4.17",
+    "source": "https://registry.npmjs.org/dompurify/-/dompurify-3.4.17.tgz",
+    "integrity": "sha512-B/pSlYVHQ58kqISD/yDjuJ1yfzI34m1gF4lAod2bwSRhiN4K5Cl3H8Af7hqB2PmTL911tdEudnnXn5FnhRoz0w==",
+    "file": "purify.es.mjs",
+    "sha256": "60c5d5ccbb466de3de3ba863461a92bf134f8c156cef7992da43e0f659bc5cbd"
+  }
+]

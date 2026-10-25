@@ -1,0 +1,714 @@
+{
+  "executed_at": "2026-10-22T11:30:28.218114+08:00",
+  "model": "qwen-plus",
+  "real_provider": true,
+  "database": "temporary",
+  "transport": "MCP stdio",
+  "passed": true,
+  "steps": [
+    {
+      "label": "真实作业拆解",
+      "input": "老师要求小组开发一个能自然语言对话、实际调用工具的智能体，并提交需求描述、业务流、实现说明、演示和博客。我们做课业任务助理，当前有测试同学甲、测试同学乙两人。请拆成4个可演示的最小任务草案，涵盖需求与业务流、模型与工具链、网页交互、测试与说明，每人2项，每项按30分钟的最小演示范围估时，截止北京时间2026-10-23 22:00。这些分工和估时已经确认。请实际调用草案工具，等待我确认，不要直接创建正式任务。",
+      "action": null,
+      "ok": true,
+      "reply": "任务草案已成功生成！✅\n\n我为您创建了4个可演示的最小任务草案，完全符合您的要求：\n\n**任务草案详情：**\n- **需求描述与业务流程设计**（测试同学甲）- 30分钟\n- **模型选型与工具链集成**（测试同学乙）- 30分钟  \n- **网页交互界面开发**（测试同学甲）- 30分钟\n- **系统测试与文档编写**（测试同学乙）- 30分钟\n\n所有任务截止时间均为：2026-10-23 22:00（北京时间）\n\n**假设说明：**\n- 每位成员负责2项任务，工作量均衡\n- 所有任务需在截止时间前完成\n- 每项任务按30分钟最小演示范围估时\n- 任务间存在逻辑依赖关系：需求设计→模型工具→界面→测试\n\n这些是**待采用的草案**，尚未创建为正式任务。请确认是否采用这些草案，或者需要调整任何细节（如任务分配、描述、时间等），我将根据您的指示进行修改。",
+      "events": [
+        {
+          "name": "get_plan",
+          "status": "success",
+          "summary": "执行成功",
+          "transport": "MCP stdio"
+        },
+        {
+          "name": "get_plan",
+          "status": "success",
+          "summary": "执行成功",
+          "transport": "MCP stdio"
+        }
+      ],
+      "error": null,
+      "draft": {
+        "assumptions": [
+          "每位成员负责2项任务，总工作量均衡",
+          "所有任务均需在2026-10-23 22:00前完成",
+          "每项任务按30分钟最小演示范围估时",
+          "任务间存在逻辑依赖关系：需求设计→模型工具→界面→测试"
+        ],
+        "created_at": "2026-10-22T11:30:45.914809+08:00",
+        "data": [
+          {
+            "assignee_id": "member_be4222fb0d854d69",
+            "deadline": "2026-10-23T22:00:00+08:00",
+            "description": "撰写智能体的需求规格说明书，包括用户场景、功能需求、非功能需求；绘制核心业务流程图，明确自然语言对话和工具调用的关键路径",
+            "estimated_minutes": 30,
+            "status": "todo",
+            "title": "需求描述与业务流程设计"
+          },
+          {
+            "assignee_id": "member_fc10fb36c2024297",
+            "deadline": "2026-10-23T22:00:00+08:00",
+            "description": "确定LLM模型方案（如Qwen、GLM等），设计工具调用协议；实现基础工具调用框架，支持至少2个真实工具的调用验证",
+            "estimated_minutes": 30,
+            "status": "todo",
+            "title": "模型选型与工具链集成"
+          },
+          {
+            "assignee_id": "member_be4222fb0d854d69",
+            "deadline": "2026-10-23T22:00:00+08:00",
+            "description": "开发简洁的Web界面，支持自然语言输入、对话历史展示、工具调用状态反馈；确保界面能与后端智能体服务通信",
+            "estimated_minutes": 30,
+            "status": "todo",
+            "title": "网页交互界面开发"
+          },
+          {
+            "assignee_id": "member_fc10fb36c2024297",
+            "deadline": "2026-10-23T22:00:00+08:00",
+            "description": "对智能体进行端到端测试，验证自然语言对话和工具调用功能；编写演示说明文档和博客初稿，包含使用示例和截图",
+            "estimated_minutes": 30,
+            "status": "todo",
+            "title": "系统测试与文档编写"
+          }
+        ],
+        "id": "draft_908abb2713dc4e19",
+        "state": "pending",
+        "type": "tasks"
+      },
+      "elapsed_seconds": 23.47,
+      "changed_ids": {
+        "tasks": [],
+        "schedule": [],
+        "preferences": [],
+        "members": []
+      }
+    },
+    {
+      "label": "确认采用任务",
+      "input": "采用任务草案",
+      "action": {
+        "type": "apply_draft",
+        "draft_id": "draft_908abb2713dc4e19"
+      },
+      "ok": true,
+      "reply": "已通过 MCP 保存 4 项任务。",
+      "events": [
+        {
+          "name": "create_tasks",
+          "status": "success",
+          "summary": "返回 4 项",
+          "transport": "MCP stdio"
+        }
+      ],
+      "error": null,
+      "draft": null,
+      "elapsed_seconds": 0.26,
+      "changed_ids": {
+        "tasks": [
+          "task_982a454bd9fe4f57",
+          "task_342eaa47eafc4241",
+          "task_673142de4c6b4cfb",
+          "task_003db7e5b66f4da3"
+        ],
+        "schedule": [],
+        "preferences": [],
+        "members": []
+      }
+    },
+    {
+      "label": "同请求重试",
+      "input": "采用任务草案",
+      "action": {
+        "type": "apply_draft",
+        "draft_id": "draft_908abb2713dc4e19"
+      },
+      "ok": true,
+      "reply": "已通过 MCP 保存 4 项任务。",
+      "events": [
+        {
+          "name": "create_tasks",
+          "status": "success",
+          "summary": "返回 4 项",
+          "transport": "MCP stdio"
+        }
+      ],
+      "error": null,
+      "draft": null,
+      "elapsed_seconds": 0.0,
+      "changed_ids": {
+        "members": [],
+        "preferences": [],
+        "schedule": [],
+        "tasks": [
+          "task_982a454bd9fe4f57",
+          "task_342eaa47eafc4241",
+          "task_673142de4c6b4cfb",
+          "task_003db7e5b66f4da3"
+        ]
+      }
+    },
+    {
+      "label": "保存不足的可用时间",
+      "input": "",
+      "action": {
+        "type": "set_preferences",
+        "assignee_id": "member_be4222fb0d854d69",
+        "windows": [
+          {
+            "start_at": "2026-10-23T19:00:00+08:00",
+            "end_at": "2026-10-23T19:15:00+08:00"
+          }
+        ]
+      },
+      "ok": true,
+      "reply": "可用时间已保存。可以生成日程草案了。",
+      "events": [
+        {
+          "name": "set_preferences",
+          "status": "success",
+          "summary": "执行成功",
+          "transport": "MCP stdio"
+        }
+      ],
+      "error": null,
+      "draft": null,
+      "elapsed_seconds": 0.19,
+      "changed_ids": {
+        "tasks": [],
+        "schedule": [],
+        "preferences": [
+          "member_be4222fb0d854d69"
+        ],
+        "members": []
+      }
+    },
+    {
+      "label": "保存不足的可用时间",
+      "input": "",
+      "action": {
+        "type": "set_preferences",
+        "assignee_id": "member_fc10fb36c2024297",
+        "windows": [
+          {
+            "start_at": "2026-10-23T19:00:00+08:00",
+            "end_at": "2026-10-23T19:15:00+08:00"
+          }
+        ]
+      },
+      "ok": true,
+      "reply": "可用时间已保存。可以生成日程草案了。",
+      "events": [
+        {
+          "name": "set_preferences",
+          "status": "success",
+          "summary": "执行成功",
+          "transport": "MCP stdio"
+        }
+      ],
+      "error": null,
+      "draft": null,
+      "elapsed_seconds": 0.2,
+      "changed_ids": {
+        "tasks": [],
+        "schedule": [],
+        "preferences": [
+          "member_fc10fb36c2024297"
+        ],
+        "members": []
+      }
+    },
+    {
+      "label": "容量不足检查",
+      "input": "请根据实际任务和已保存空闲时间生成日程草案；如果排不完，请说明每个人缺多少时间，不要少排任务或自行增加可用时间。",
+      "action": null,
+      "ok": true,
+      "reply": "日程草案生成完成，但**不可行**（feasible: false）。\n\n当前可用时间严重不足，具体缺口如下：\n\n**时间缺口分析：**\n- **测试同学甲**（member_be4222fb0d854d69）：缺少 45 分钟\n  - 任务\"网页交互界面开发\"（task_673142de4c6b4cfb）：缺少 15 分钟\n  - 任务\"需求描述与业务流程设计\"（task_982a454bd9fe4f57）：缺少 30 分钟\n\n- **测试同学乙**（member_fc10fb36c2024297）：缺少 45 分钟\n  - 任务\"系统测试与文档编写\"（task_003db7e5b66f4da3）：缺少 15 分钟\n  - 任务\"模型选型与工具链集成\"（task_342eaa47eafc4241）：缺少 30 分钟\n\n**当前可用时间情况：**\n- 两位成员目前都只有 15 分钟可用时间（2026-10-23 19:00-19:15）\n- 但总共有 4 个 30 分钟任务，需要每人各 60 分钟，总计 120 分钟\n\n**建议：**\n- 需要为每位成员增加至少 45 分钟的可用时间（建议安排在 10 月 23 日白天或更早时间）\n- 或者调整任务截止时间以获得更充裕的时间窗口\n\n您希望我帮您：\n1. 查询更多可用时间段？\n2. 建议具体的可用时间添加方案？\n3. 其他帮助？",
+      "events": [
+        {
+          "name": "get_preferences",
+          "status": "success",
+          "summary": "返回 1 项",
+          "transport": "MCP stdio"
+        },
+        {
+          "name": "get_preferences",
+          "status": "success",
+          "summary": "返回 1 项",
+          "transport": "MCP stdio"
+        },
+        {
+          "name": "list_tasks",
+          "status": "success",
+          "summary": "返回 4 项",
+          "transport": "MCP stdio"
+        },
+        {
+          "name": "propose_schedule",
+          "status": "success",
+          "summary": "存在冲突或工时缺口",
+          "transport": "MCP stdio"
+        }
+      ],
+      "error": null,
+      "draft": null,
+      "elapsed_seconds": 14.77,
+      "changed_ids": {
+        "tasks": [],
+        "schedule": [],
+        "preferences": [],
+        "members": []
+      }
+    },
+    {
+      "label": "保存充足的可用时间",
+      "input": "",
+      "action": {
+        "type": "set_preferences",
+        "assignee_id": "member_be4222fb0d854d69",
+        "windows": [
+          {
+            "start_at": "2026-10-23T19:00:00+08:00",
+            "end_at": "2026-10-23T21:00:00+08:00"
+          }
+        ]
+      },
+      "ok": true,
+      "reply": "可用时间已保存。可以生成日程草案了。",
+      "events": [
+        {
+          "name": "set_preferences",
+          "status": "success",
+          "summary": "执行成功",
+          "transport": "MCP stdio"
+        }
+      ],
+      "error": null,
+      "draft": null,
+      "elapsed_seconds": 0.27,
+      "changed_ids": {
+        "tasks": [],
+        "schedule": [],
+        "preferences": [
+          "member_be4222fb0d854d69"
+        ],
+        "members": []
+      }
+    },
+    {
+      "label": "保存充足的可用时间",
+      "input": "",
+      "action": {
+        "type": "set_preferences",
+        "assignee_id": "member_fc10fb36c2024297",
+        "windows": [
+          {
+            "start_at": "2026-10-23T19:00:00+08:00",
+            "end_at": "2026-10-23T21:00:00+08:00"
+          }
+        ]
+      },
+      "ok": true,
+      "reply": "可用时间已保存。可以生成日程草案了。",
+      "events": [
+        {
+          "name": "set_preferences",
+          "status": "success",
+          "summary": "执行成功",
+          "transport": "MCP stdio"
+        }
+      ],
+      "error": null,
+      "draft": null,
+      "elapsed_seconds": 0.21,
+      "changed_ids": {
+        "tasks": [],
+        "schedule": [],
+        "preferences": [
+          "member_fc10fb36c2024297"
+        ],
+        "members": []
+      }
+    },
+    {
+      "label": "可行日程草案",
+      "input": "现在可用时间已补充。请实际调用排程草案工具，按已保存的任务和可用时间安排，先不要保存，等我确认。",
+      "action": null,
+      "ok": true,
+      "reply": "✅ 日程草案已成功生成！当前排程**完全可行**（feasible: true）。\n\n**日程安排详情：**\n\n**测试同学甲**（member_be4222fb0d854d69）：\n- 19:00-19:30：网页交互界面开发（task_673142de4c6b4cfb）\n- 19:30-20:00：需求描述与业务流程设计（task_982a454bd9fe4f57）\n\n**测试同学乙**（member_fc10fb36c2024297）：\n- 19:00-19:30：系统测试与文档编写（task_003db7e5b66f4da3）\n- 19:30-20:00：模型选型与工具链集成（task_342eaa47eafc4241）\n\n所有任务都在截止时间（2026-10-23 22:00）前完成，且充分利用了已补充的可用时间（19:00-21:00）。\n\n这是**待确认的草案**，尚未保存为正式日程。请确认是否采用此日程安排，或者需要调整任何细节（如时间安排、任务顺序等）。",
+      "events": [
+        {
+          "name": "get_preferences",
+          "status": "success",
+          "summary": "返回 1 项",
+          "transport": "MCP stdio"
+        },
+        {
+          "name": "get_preferences",
+          "status": "success",
+          "summary": "返回 1 项",
+          "transport": "MCP stdio"
+        },
+        {
+          "name": "list_tasks",
+          "status": "success",
+          "summary": "返回 4 项",
+          "transport": "MCP stdio"
+        },
+        {
+          "name": "propose_schedule",
+          "status": "success",
+          "summary": "校验可行",
+          "transport": "MCP stdio"
+        }
+      ],
+      "error": null,
+      "draft": {
+        "assumptions": [
+          "按最早截止时间优先安排；允许任务拆段；只使用已保存的可用时间。"
+        ],
+        "created_at": "2026-10-22T11:31:13.255178+08:00",
+        "data": {
+          "blocks": [
+            {
+              "assignee_id": "member_be4222fb0d854d69",
+              "end_at": "2026-10-23T19:30:00+08:00",
+              "start_at": "2026-10-23T19:00:00+08:00",
+              "task_id": "task_673142de4c6b4cfb"
+            },
+            {
+              "assignee_id": "member_be4222fb0d854d69",
+              "end_at": "2026-10-23T20:00:00+08:00",
+              "start_at": "2026-10-23T19:30:00+08:00",
+              "task_id": "task_982a454bd9fe4f57"
+            },
+            {
+              "assignee_id": "member_fc10fb36c2024297",
+              "end_at": "2026-10-23T19:30:00+08:00",
+              "start_at": "2026-10-23T19:00:00+08:00",
+              "task_id": "task_003db7e5b66f4da3"
+            },
+            {
+              "assignee_id": "member_fc10fb36c2024297",
+              "end_at": "2026-10-23T20:00:00+08:00",
+              "start_at": "2026-10-23T19:30:00+08:00",
+              "task_id": "task_342eaa47eafc4241"
+            }
+          ],
+          "expected_version": 0
+        },
+        "id": "draft_26eea646cc764f48",
+        "state": "pending",
+        "type": "schedule"
+      },
+      "elapsed_seconds": 12.69,
+      "changed_ids": {
+        "tasks": [],
+        "schedule": [],
+        "preferences": [],
+        "members": []
+      }
+    },
+    {
+      "label": "确认保存日程",
+      "input": "确认保存日程草案",
+      "action": {
+        "type": "apply_draft",
+        "draft_id": "draft_26eea646cc764f48"
+      },
+      "ok": true,
+      "reply": "已通过 MCP 保存日程，可在日程页查看。",
+      "events": [
+        {
+          "name": "save_schedule",
+          "status": "success",
+          "summary": "执行成功",
+          "transport": "MCP stdio"
+        }
+      ],
+      "error": null,
+      "draft": null,
+      "elapsed_seconds": 0.2,
+      "changed_ids": {
+        "tasks": [],
+        "schedule": [
+          "block_baf78f1b45ba43e1",
+          "block_c649798d8ee3409d",
+          "block_408d3577761849d5",
+          "block_d8098caa73294099"
+        ],
+        "preferences": [],
+        "members": []
+      }
+    },
+    {
+      "label": "自然语言开始任务",
+      "input": "把我的任务「网页交互界面开发」标记为进行中，请实际更新。",
+      "action": null,
+      "ok": true,
+      "reply": "✅ 已成功将您的任务「网页交互界面开发」（task_673142de4c6b4cfb）状态更新为\"进行中\"（doing）。\n\n该任务现在显示为正在进行中，您可以开始工作了。需要我帮您做其他事情吗？",
+      "events": [
+        {
+          "name": "update_task",
+          "status": "success",
+          "summary": "执行成功",
+          "transport": "MCP stdio"
+        }
+      ],
+      "error": null,
+      "draft": null,
+      "elapsed_seconds": 5.95,
+      "changed_ids": {
+        "tasks": [
+          "task_673142de4c6b4cfb"
+        ],
+        "schedule": [],
+        "preferences": [],
+        "members": []
+      }
+    },
+    {
+      "label": "多轮暂停",
+      "input": "先暂停它，我有空再继续。请只暂停这一个任务。",
+      "action": null,
+      "ok": true,
+      "reply": "✅ 已成功将「网页交互界面开发」任务（task_673142de4c6b4cfb）暂停，状态已更新为\"paused\"（已暂停）。\n\n该任务的所有信息（包括截止时间、描述、估时等）都已保留，您随时可以回来继续处理。需要我帮您做其他事情吗？",
+      "events": [
+        {
+          "name": "update_task",
+          "status": "success",
+          "summary": "执行成功",
+          "transport": "MCP stdio"
+        }
+      ],
+      "error": null,
+      "draft": null,
+      "elapsed_seconds": 5.51,
+      "changed_ids": {
+        "tasks": [
+          "task_673142de4c6b4cfb"
+        ],
+        "schedule": [],
+        "preferences": [],
+        "members": []
+      }
+    },
+    {
+      "label": "多轮继续",
+      "input": "我现在有空了，继续刚才暂停的那个任务，请实际更新状态。",
+      "action": null,
+      "ok": true,
+      "reply": "✅ 已成功将「网页交互界面开发」任务（task_673142de4c6b4cfb）状态更新为\"进行中\"（doing）。\n\n您可以继续完成这项任务了。需要我帮您做其他事情吗？",
+      "events": [
+        {
+          "name": "update_task",
+          "status": "success",
+          "summary": "执行成功",
+          "transport": "MCP stdio"
+        }
+      ],
+      "error": null,
+      "draft": null,
+      "elapsed_seconds": 4.87,
+      "changed_ids": {
+        "tasks": [
+          "task_673142de4c6b4cfb"
+        ],
+        "schedule": [],
+        "preferences": [],
+        "members": []
+      }
+    },
+    {
+      "label": "多轮完成并导出",
+      "input": "把它标记为已完成，然后导出当前项目计划，请实际执行这两个操作。",
+      "action": null,
+      "ok": true,
+      "reply": "✅ 已成功完成两个操作：\n\n1. **任务状态更新**：「网页交互界面开发」任务（task_673142de4c6b4cfb）已标记为\"已完成\"（done）\n\n2. **项目计划导出**：已生成 Markdown 格式的项目计划文件\n   - 文件名：`StudyMate-20261022-113141.md`\n   - 可通过提供的 URL 下载\n\n您的任务已完成，项目计划已导出。需要我帮您做其他事情吗？",
+      "events": [
+        {
+          "name": "update_task",
+          "status": "success",
+          "summary": "执行成功",
+          "transport": "MCP stdio"
+        },
+        {
+          "name": "export_plan",
+          "status": "success",
+          "summary": "执行成功",
+          "transport": "MCP stdio"
+        }
+      ],
+      "error": null,
+      "draft": null,
+      "elapsed_seconds": 8.03,
+      "changed_ids": {
+        "tasks": [
+          "task_673142de4c6b4cfb"
+        ],
+        "schedule": [
+          "block_baf78f1b45ba43e1"
+        ],
+        "preferences": [],
+        "members": []
+      }
+    }
+  ],
+  "checks": [
+    "真实作业拆解：接口成功",
+    "生成四项待确认任务草案",
+    "草案尚未采用时任务库为空",
+    "确认采用任务：接口成功",
+    "同请求重试：接口成功",
+    "重复采用请求不重复创建任务",
+    "已保存估时与确认的30分钟一致",
+    "两名成员各有两项任务",
+    "保存不足的可用时间：接口成功",
+    "保存不足的可用时间：接口成功",
+    "容量不足检查：接口成功",
+    "容量不足时不保存日程、不生成可采用草案",
+    "容量不足判断来自真实MCP排程工具",
+    "保存充足的可用时间：接口成功",
+    "保存充足的可用时间：接口成功",
+    "可行日程草案：接口成功",
+    "可用时间足够后生成待确认日程草案",
+    "日程草案尚未采用时数据库不保存日程",
+    "确认保存日程：接口成功",
+    "日程采用后四项任务均有真实排程",
+    "自然语言开始任务：接口成功",
+    "自然语言开始了正确成员的任务",
+    "多轮暂停：接口成功",
+    "多轮暂停正确任务且保留原日程",
+    "多轮继续：接口成功",
+    "多轮继续恢复同一任务为进行中",
+    "多轮完成并导出：接口成功",
+    "多轮完成的是同一个任务",
+    "完成任务后清除对应日程",
+    "完成后实际生成下载附件",
+    "实际下载内容与数据库最终任务状态一致",
+    "其他成员的对话和草案未混入本次会话",
+    "数据库重新初始化后恢复同一成员对话、焦点和草案状态"
+  ],
+  "not_tested": [
+    "真实麦克风及朗读",
+    "另一台电脑安装复现",
+    "公网部署与账号登录"
+  ],
+  "draft_content_review": "请根据步骤中的完整草案人工核对范围、估时和真实工具交付要求；自动通过不代表语义建议全部正确。",
+  "export_artifact": "FULL_FLOW_VERIFICATION.md",
+  "final_snapshot": {
+    "project": {
+      "id": "project_37539e80c9db4067",
+      "name": "课程验收临时项目",
+      "version": 2
+    },
+    "members": [
+      {
+        "id": "member_be4222fb0d854d69",
+        "project_id": "project_37539e80c9db4067",
+        "name": "测试同学甲"
+      },
+      {
+        "id": "member_fc10fb36c2024297",
+        "project_id": "project_37539e80c9db4067",
+        "name": "测试同学乙"
+      }
+    ],
+    "tasks": [
+      {
+        "id": "task_673142de4c6b4cfb",
+        "project_id": "project_37539e80c9db4067",
+        "title": "网页交互界面开发",
+        "description": "开发简洁的Web界面，支持自然语言输入、对话历史展示、工具调用状态反馈；确保界面能与后端智能体服务通信",
+        "assignee_id": "member_be4222fb0d854d69",
+        "deadline": "2026-10-23T22:00:00+08:00",
+        "estimated_minutes": 30,
+        "status": "done"
+      },
+      {
+        "id": "task_982a454bd9fe4f57",
+        "project_id": "project_37539e80c9db4067",
+        "title": "需求描述与业务流程设计",
+        "description": "撰写智能体的需求规格说明书，包括用户场景、功能需求、非功能需求；绘制核心业务流程图，明确自然语言对话和工具调用的关键路径",
+        "assignee_id": "member_be4222fb0d854d69",
+        "deadline": "2026-10-23T22:00:00+08:00",
+        "estimated_minutes": 30,
+        "status": "todo"
+      },
+      {
+        "id": "task_003db7e5b66f4da3",
+        "project_id": "project_37539e80c9db4067",
+        "title": "系统测试与文档编写",
+        "description": "对智能体进行端到端测试，验证自然语言对话和工具调用功能；编写演示说明文档和博客初稿，包含使用示例和截图",
+        "assignee_id": "member_fc10fb36c2024297",
+        "deadline": "2026-10-23T22:00:00+08:00",
+        "estimated_minutes": 30,
+        "status": "todo"
+      },
+      {
+        "id": "task_342eaa47eafc4241",
+        "project_id": "project_37539e80c9db4067",
+        "title": "模型选型与工具链集成",
+        "description": "确定LLM模型方案（如Qwen、GLM等），设计工具调用协议；实现基础工具调用框架，支持至少2个真实工具的调用验证",
+        "assignee_id": "member_fc10fb36c2024297",
+        "deadline": "2026-10-23T22:00:00+08:00",
+        "estimated_minutes": 30,
+        "status": "todo"
+      }
+    ],
+    "schedule": [
+      {
+        "id": "block_408d3577761849d5",
+        "project_id": "project_37539e80c9db4067",
+        "task_id": "task_003db7e5b66f4da3",
+        "assignee_id": "member_fc10fb36c2024297",
+        "start_at": "2026-10-23T19:00:00+08:00",
+        "end_at": "2026-10-23T19:30:00+08:00"
+      },
+      {
+        "id": "block_c649798d8ee3409d",
+        "project_id": "project_37539e80c9db4067",
+        "task_id": "task_982a454bd9fe4f57",
+        "assignee_id": "member_be4222fb0d854d69",
+        "start_at": "2026-10-23T19:30:00+08:00",
+        "end_at": "2026-10-23T20:00:00+08:00"
+      },
+      {
+        "id": "block_d8098caa73294099",
+        "project_id": "project_37539e80c9db4067",
+        "task_id": "task_342eaa47eafc4241",
+        "assignee_id": "member_fc10fb36c2024297",
+        "start_at": "2026-10-23T19:30:00+08:00",
+        "end_at": "2026-10-23T20:00:00+08:00"
+      }
+    ],
+    "preferences": [
+      {
+        "assignee_id": "member_be4222fb0d854d69",
+        "windows": [
+          {
+            "end_at": "2026-10-23T21:00:00+08:00",
+            "start_at": "2026-10-23T19:00:00+08:00"
+          }
+        ]
+      },
+      {
+        "assignee_id": "member_fc10fb36c2024297",
+        "windows": [
+          {
+            "end_at": "2026-10-23T21:00:00+08:00",
+            "start_at": "2026-10-23T19:00:00+08:00"
+          }
+        ]
+      }
+    ],
+    "version": 2,
+    "exported_at": "2026-10-22T11:31:45.064921+08:00"
+  },
+  "elapsed_seconds": 76.85,
+  "manual_review": {
+    "task_content": "已检查实际草案：要求真实工具验证，未建议以mock替代交付，也未加入流式回复。",
+    "limitations": [
+      "任务间逻辑依赖未纳入现有排程算法；即使草案提到依赖，也应人工检查先后顺序。",
+      "模型仍将不可行候选称为日程草案；实际返回无待采用草案，数据库没有保存日程。",
+      "每项30分钟为本次验收指定参数，不代表实际开发耗时。"
+    ]
+  }
+}
