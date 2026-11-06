@@ -7,7 +7,7 @@ from backend.storage.db import transaction, rows, uid, dumps
 from backend.services.models import TaskInput, Window, Block, timestamp
 from backend.exports.markdown import export_markdown
 
-WRITES = {'create_tasks', 'update_task', 'set_preferences', 'save_schedule', 'export_plan', 'manage_member'}
+WRITES = {'create_tasks', 'update_task', 'set_preferences', 'save_schedule', 'export_plan', 'manage_member', 'record_review_analysis', 'create_review_task'}
 
 
 class BusinessError(ValueError):
@@ -104,11 +104,11 @@ def snapshot(db, project_id):
             'preferences': get_preferences(db, project_id), 'version': p['version'], 'exported_at': now().isoformat()}
 
 
-def check_schedule(db, project_id, proposed_blocks, range_start=None, range_end=None):
+def check_schedule(db, project_id, proposed_blocks, range_start=None, range_end=None, assignee_id=None):
     if len(proposed_blocks) > 500:
         fail('LIMIT', '日程块过多')
     blocks = [Block.model_validate(b).model_dump() for b in proposed_blocks]
-    tasks = {t['id']: t for t in list_tasks(db, project_id)}
+    tasks = {t['id']: t for t in list_tasks(db, project_id, assignee_id=assignee_id)}
     preferences = {p['assignee_id']: p['windows'] for p in get_preferences(db, project_id)}
     start_limit = timestamp(range_start) if range_start else None
     end_limit = timestamp(range_end) if range_end else None
@@ -158,12 +158,14 @@ def check_schedule(db, project_id, proposed_blocks, range_start=None, range_end=
             'blocks': blocks, 'version': project(db, project_id)['version']}
 
 
-def propose_schedule(db, project_id):
+def propose_schedule(db, project_id, assignee_id=None):
     """最早截止优先；使用已确认可用时段，允许任务拆段，不假设默认空闲时间。"""
-    tasks = [t for t in list_tasks(db, project_id) if t['status'] != 'done']
-    cursor = now().replace(second=0, microsecond=0) + timedelta(minutes=1)
+    tasks = [t for t in list_tasks(db, project_id, assignee_id=assignee_id) if t['status'] != 'done']
+    current_time = now()
+    cursor = current_time.replace(second=0, microsecond=0) + timedelta(minutes=1)
     windows = {p['assignee_id']: [[max(timestamp(w['start_at']), cursor), timestamp(w['end_at'])]
                for w in p['windows']] for p in get_preferences(db, project_id)}
+    unavailable = sorted({t['assignee_id'] for t in tasks if not any(end>start for start,end in windows[t['assignee_id']])})
     blocks = []
     for t in tasks:
         remaining = t['estimated_minutes']
@@ -178,7 +180,10 @@ def propose_schedule(db, project_id):
                 w[0], remaining = stop, remaining - take
             if remaining == 0:
                 break
-    return check_schedule(db, project_id, blocks)
+    result = check_schedule(db, project_id, blocks, assignee_id=assignee_id)
+    result['overdue_tasks'] = [{'title':t['title'],'assignee_id':t['assignee_id']} for t in tasks if timestamp(t['deadline']) <= current_time]
+    result['unavailable_assignees'] = unavailable
+    return result
 
 
 def _dispatch(db, name, project_id, args):
@@ -277,19 +282,23 @@ def _dispatch(db, name, project_id, args):
     if name == 'check_schedule':
         return success(check_schedule(db, project_id, **args))
     if name == 'propose_schedule':
-        return success(propose_schedule(db, project_id))
+        if set(args)-{'assignee_id'}:fail('INVALID_ARGUMENTS','排程参数不合法')
+        return success(propose_schedule(db, project_id, **args))
     if name == 'save_schedule':
-        if set(args) != {'blocks', 'expected_version'}:
+        if not {'blocks', 'expected_version'} <= set(args) or set(args)-{'blocks', 'expected_version','assignee_id'}:
             fail('INVALID_ARGUMENTS', '需提供 blocks 和 expected_version')
         current = project(db, project_id)['version']
         if type(args['expected_version']) is not int or args['expected_version'] != current:
             fail('VERSION_CONFLICT', '日程版本已变化，请重新生成草案')
         # 空列表明确表示清空；非空保存必须覆盖全部未完成任务。
-        result = check_schedule(db, project_id, args['blocks'])
+        assignee_id=args.get('assignee_id')
+        result = check_schedule(db, project_id, args['blocks'], assignee_id=assignee_id)
         if args['blocks'] and not result['feasible']:
             fail('INVALID_SCHEDULE', '日程校验失败：' + dumps(result))
-        ids['schedule'] = [b['id'] for b in rows(db, 'SELECT id FROM schedule_blocks WHERE project_id=?', (project_id,))]
-        db.execute('DELETE FROM schedule_blocks WHERE project_id=?', (project_id,))
+        where='project_id=?' + (' AND assignee_id=?' if assignee_id is not None else '')
+        values=(project_id,assignee_id) if assignee_id is not None else (project_id,)
+        ids['schedule'] = [b['id'] for b in rows(db, 'SELECT id FROM schedule_blocks WHERE '+where, values)]
+        db.execute('DELETE FROM schedule_blocks WHERE '+where, values)
         saved = []
         for b in result['blocks']:
             b = {'id': uid('block'), 'project_id': project_id, **b}

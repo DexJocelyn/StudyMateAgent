@@ -4,12 +4,35 @@ from backend.storage.db import transaction, uid, rows, dumps
 from backend.services.tools import fail
 
 
-def list_projects():
+PROJECTS_SQL='''SELECT p.id,p.name,p.version,COALESCE(a.archived,0) AS archived,
+    (SELECT COUNT(*) FROM members m WHERE m.project_id=p.id) AS member_count,
+    (SELECT COUNT(*) FROM tasks t WHERE t.project_id=p.id) AS task_count
+    FROM projects p LEFT JOIN project_archives a ON a.project_id=p.id'''
+
+
+def list_projects(include_archived=False):
     with transaction() as db:
-        return rows(db, '''SELECT p.id,p.name,p.version,
-            (SELECT COUNT(*) FROM members m WHERE m.project_id=p.id) AS member_count,
-            (SELECT COUNT(*) FROM tasks t WHERE t.project_id=p.id) AS task_count
-            FROM projects p ORDER BY p.rowid''')
+        return [{**p,'archived':bool(p['archived'])} for p in rows(db,PROJECTS_SQL+('' if include_archived else ' WHERE COALESCE(a.archived,0)=0')+' ORDER BY p.rowid')]
+
+
+def update_project(project_id,name=None,archived=None):
+    if (name is None)==(archived is None):fail('INVALID_ARGUMENTS','每次请选择重命名或归档操作。')
+    if name is not None:
+        name=name.strip()
+        if not 1<=len(name)<=80:fail('INVALID_PROJECT_NAME','项目名称需为1～80个字符。')
+    if archived is not None and type(archived) is not bool:fail('INVALID_ARGUMENTS','归档状态不合法。')
+    with transaction() as db:
+        current=db.execute(PROJECTS_SQL+' WHERE p.id=?',(project_id,)).fetchone()
+        if current is None:fail('NOT_FOUND','项目不存在。')
+        if name is not None:db.execute('UPDATE projects SET name=? WHERE id=?',(name,project_id))
+        else:
+            if archived and not current['archived']:
+                count=db.execute('SELECT COUNT(*) FROM projects p LEFT JOIN project_archives a ON a.project_id=p.id WHERE COALESCE(a.archived,0)=0').fetchone()[0]
+                if count<=1:fail('LAST_ACTIVE_PROJECT','请至少保留一个在用项目。可以先新建或恢复其他项目，再归档这个项目。')
+            db.execute('INSERT INTO project_archives(project_id,archived) VALUES(?,?) ON CONFLICT(project_id) DO UPDATE SET archived=excluded.archived',(project_id,int(archived)))
+        value=dict(db.execute(PROJECTS_SQL+' WHERE p.id=?',(project_id,)).fetchone())
+        value['archived']=bool(value['archived'])
+        return value
 
 
 def create_project(name, members, request_id):

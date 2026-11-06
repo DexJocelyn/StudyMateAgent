@@ -48,6 +48,9 @@ def initialize():
         db.executescript('''
         CREATE TABLE IF NOT EXISTS projects (
             id TEXT PRIMARY KEY, name TEXT NOT NULL, version INTEGER NOT NULL DEFAULT 0);
+        CREATE TABLE IF NOT EXISTS project_archives (
+            project_id TEXT PRIMARY KEY REFERENCES projects(id),
+            archived INTEGER NOT NULL DEFAULT 0 CHECK(archived IN (0,1)));
         CREATE TABLE IF NOT EXISTS members (
             id TEXT PRIMARY KEY, project_id TEXT NOT NULL REFERENCES projects(id), name TEXT NOT NULL);
         CREATE TABLE IF NOT EXISTS tasks (
@@ -84,6 +87,22 @@ def initialize():
             id TEXT PRIMARY KEY, month TEXT NOT NULL, created_at TEXT NOT NULL,
             query_hash TEXT NOT NULL, result TEXT);
         CREATE INDEX IF NOT EXISTS web_search_cache ON web_search_calls(query_hash,created_at);
+        CREATE TABLE IF NOT EXISTS review_workspaces (
+            project_id TEXT PRIMARY KEY REFERENCES projects(id), instructions TEXT NOT NULL,
+            version INTEGER NOT NULL DEFAULT 0);
+        CREATE TABLE IF NOT EXISTS review_materials (
+            id TEXT PRIMARY KEY, project_id TEXT NOT NULL REFERENCES projects(id),
+            name TEXT NOT NULL, content TEXT NOT NULL);
+        CREATE TABLE IF NOT EXISTS review_runs (
+            id TEXT PRIMARY KEY, project_id TEXT NOT NULL REFERENCES projects(id), request_id TEXT NOT NULL,
+            fingerprint TEXT NOT NULL, source_version INTEGER NOT NULL, created_at TEXT NOT NULL,
+            items TEXT NOT NULL, events TEXT NOT NULL, kind TEXT NOT NULL, human_version INTEGER NOT NULL DEFAULT 0,
+            UNIQUE(project_id,request_id));
+        CREATE TABLE IF NOT EXISTS review_task_links (
+            run_id TEXT NOT NULL REFERENCES review_runs(id), item_index INTEGER NOT NULL,
+            task_id TEXT NOT NULL REFERENCES tasks(id), fingerprint TEXT NOT NULL,
+            PRIMARY KEY(run_id,item_index));
+        CREATE INDEX IF NOT EXISTS review_materials_project ON review_materials(project_id);
         CREATE INDEX IF NOT EXISTS tasks_by_project ON tasks(project_id);
         CREATE INDEX IF NOT EXISTS blocks_by_project ON schedule_blocks(project_id);
         ''')

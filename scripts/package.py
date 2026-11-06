@@ -5,7 +5,7 @@ from zipfile import ZipFile, ZIP_DEFLATED
 ROOT = Path(__file__).resolve().parent.parent
 INCLUDE = ['backend', 'frontend', 'scripts', 'tests', 'docs', 'README.md', 'requirements.txt',
            'requirements.lock', '.env.example', '.gitignore', '启动课伴.command', '启动公网分享.command',
-           '启动课伴-Windows.bat', '启动公网分享-Windows.bat']
+           '启动课伴-Windows.bat', '启动公网分享-Windows.bat', '启动教室共享.command', '停止教室共享.command']
 
 
 def main():

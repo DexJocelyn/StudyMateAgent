@@ -32,23 +32,36 @@ def source_files():
         for p in (ROOT/folder).rglob('*'):
             if p.is_file() and '__pycache__' not in p.parts and p.suffix!='.pyc':files.append(p)
     for name in ('README.md','.gitignore','.env.example','requirements.txt','requirements.lock',
-                 '启动课伴.command','启动公网分享.command','启动课伴-Windows.bat','启动公网分享-Windows.bat'):
+                 '启动课伴.command','启动公网分享.command','启动课伴-Windows.bat','启动公网分享-Windows.bat',
+                 '启动教室共享.command','停止教室共享.command'):
         files.append(ROOT/name)
     files.extend(ROOT/'docs'/name for name in DOCS)
+    files.append(ROOT/'docs/作业自查_使用与验收说明.md')
+    files.append(ROOT/'docs/教室共享与Windows客户端.md')
+    files.append(ROOT/'docs/个人任务与时间安排.md')
+    files.append(ROOT/'docs/组员接入自己的模型.md')
+    files.append(ROOT/'docs/ROG教室客户端验收说明.md')
     files.extend((ROOT/'docs').glob('*VERIFICATION*.json'))
+    files.extend(ROOT/'docs'/name for name in ('版本更新_20261106.md','AI模拟走查_核对与改进清单.md'))
+    files.extend(p for p in (ROOT/'examples/review').rglob('*') if p.is_file())
     # 公开源码仅保留报告中的在线图片地址，不自动发布本机截图。
     return sorted(set(files))
 
 
-def main():
-    destination=ROOT/'dist/github-upload/StudyMateAgent'
+def main(destination=None, source_only=False, runtime_only=False):
+    destination=Path(destination) if destination else ROOT/'dist/github-upload/StudyMateAgent'
     destination.mkdir(parents=True,exist_ok=True)
     if any(destination.iterdir()):raise SystemExit('目标目录已有文件，未覆盖。请换用空目录或核对后保留旧版。')
     env=dotenv_values(ROOT/'.env') if (ROOT/'.env').exists() else {}
     share=dotenv_values(ROOT/'.env.share') if (ROOT/'.env.share').exists() else {}
     secrets=[env.get('MODEL_API_KEY'),env.get('TAVILY_API_KEY'),share.get('STUDYMATE_ACCESS_PASSWORD')]
     entries=[]
-    for source in source_files():
+    candidates=source_files()
+    if runtime_only:
+        # 公开运行源码更新不发布课程报告、模拟走查记录或个人验收材料。
+        candidates=[p for p in candidates if not (p.parent==ROOT/'docs' and
+                    (p.suffix=='.json' or p.name in ('课伴StudyMate_课程作业报告.md','AI模拟走查_核对与改进清单.md')))]
+    for source in candidates:
         relative=source.relative_to(ROOT).as_posix()
         content=source.read_bytes()
         if relative=='docs/课伴StudyMate_课程作业报告.md':
@@ -72,8 +85,15 @@ def main():
                         'git_blob_sha':hashlib.sha1(b'blob '+str(len(content)).encode()+b'\0'+content).hexdigest()})
     manifest={'files':entries,'excluded':['.env','.env.share','data/','.venv/','.tools/','dist/','jpg/','个人背景调查材料','本机截图（报告保留在线图链）'],
               'credentials_scanned':True,'real_provider_called':False}
+    if runtime_only:
+        manifest['excluded'].extend(['课程报告','AI模拟走查记录','docs/中的验收JSON记录'])
+        manifest['scope']='公开运行源码、教学示例与技术说明；不变更仓库历史中已有的报告文件'
     manifest_path=destination/'发布文件校验.json'
     manifest_path.write_text(json.dumps(manifest,ensure_ascii=False,indent=2)+'\n')
+    if source_only:
+        print(json.dumps({'directory':str(destination),'files':len(entries)+1,
+                          'bytes':sum(e['size'] for e in entries),'audit':'passed'},ensure_ascii=False))
+        return
     def archive(path,extra=None):
         with ZipFile(path,'w',ZIP_DEFLATED) as z:
             for item in sorted(destination.rglob('*')):
@@ -93,4 +113,11 @@ def main():
                       'source_zip':str(common),'member_zips':len(MEMBERS),'audit':'passed'},ensure_ascii=False))
 
 
-if __name__=='__main__':main()
+if __name__=='__main__':
+    import argparse
+    parser=argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--destination',type=Path,help='使用一个新的空目录准备公开源码')
+    parser.add_argument('--source-only',action='store_true',help='只准备公开源码，不重新生成组员ZIP')
+    parser.add_argument('--runtime-only',action='store_true',help='公开运行源码范围：排除课程报告、走查和验收记录')
+    args=parser.parse_args()
+    main(args.destination,args.source_only,args.runtime_only)

@@ -10,14 +10,15 @@ from backend.config import ROOT, PROJECT_ID, now
 from backend.storage.db import initialize, connect
 from backend.memory import store
 from backend.services.tools import execute, BusinessError
-from backend.services.models import ChatRequest
+from backend.services.models import ChatRequest, StrictModel
 from backend.agent.runner import chat
 from backend.mcp_client import open_tools
-from backend.services.projects import list_projects, create_project
+from backend.services.projects import list_projects, create_project, update_project
 from backend.storage.db import dumps
 from backend.access import load_access_config, unauthorized_response
 from backend.services.search import configuration as search_configuration
 from backend.services.weather import configuration as weather_configuration
+from backend.review_api import router as review_router
 
 
 @asynccontextmanager
@@ -38,6 +39,7 @@ async def lifespan(app):
 
 
 app = FastAPI(title='课伴 StudyMate', version='0.1.0', lifespan=lifespan)
+app.include_router(review_router)
 app.mount('/static', StaticFiles(directory=ROOT / 'frontend'), name='static')
 
 
@@ -53,7 +55,7 @@ async def revalidate_interface(request: Request, call_next):
         response.headers['X-Content-Type-Options'] = 'nosniff'
         response.headers['Referrer-Policy'] = 'no-referrer'
         response.headers['X-Frame-Options'] = 'DENY'
-    if not access.enabled and (request.url.path == '/' or request.url.path.startswith('/static/')):
+    if not access.enabled and (request.url.path in ('/', '/tasks', '/review') or request.url.path.startswith('/static/')):
         response.headers['Cache-Control'] = 'no-cache'
     return response
 
@@ -67,6 +69,16 @@ async def business_error(request: Request, exc: BusinessError):
 @app.get('/')
 def index():
     return FileResponse(ROOT / 'frontend' / 'index.html')
+
+
+@app.get('/tasks')
+def task_workspace():
+    return FileResponse(ROOT / 'frontend' / 'index.html')
+
+
+@app.get('/review')
+def delivery_review():
+    return FileResponse(ROOT / 'frontend' / 'review.html')
 
 
 @app.api_route('/healthz', methods=['GET', 'HEAD'])
@@ -99,13 +111,23 @@ class ProjectInput(BaseModel):
 
 
 @app.get('/api/projects')
-def projects_get():
-    return list_projects()
+def projects_get(include_archived:bool=False):
+    return list_projects(include_archived)
 
 
 @app.post('/api/projects')
 def project_create(body: ProjectInput):
     return create_project(body.name, body.members, body.request_id)
+
+
+class ProjectUpdate(StrictModel):
+    name:str|None=Field(default=None,min_length=1,max_length=80)
+    archived:bool|None=Field(default=None,strict=True)
+
+
+@app.patch('/api/projects/{project_id}')
+def project_update(project_id:str,body:ProjectUpdate):
+    return update_project(project_id,body.name,body.archived)
 
 
 @app.post('/api/sessions')

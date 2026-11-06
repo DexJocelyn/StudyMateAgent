@@ -14,13 +14,14 @@ from backend.services.search import configuration as search_configuration, publi
 from backend.services.weather import configuration as weather_configuration
 from backend.mcp_client import open_tools
 from backend.agent.progress import emit, TOOL_LABELS
+from backend.agent.presentation import clock_facts, deadline_facts, readable_reply, project_display_names
 
 LOCAL_TOOLS = [
     {'type': 'function', 'function': {'name': 'draft_tasks', 'description': '将作业拆解为任务草案，等待用户采用，不创建正式任务。估时是建议。',
      'parameters': {'type': 'object', 'properties': {'tasks': {'type': 'array', 'items': TaskInput.model_json_schema()},
                     'assumptions': {'type': 'array', 'items': {'type': 'string'}}}, 'required': ['tasks', 'assumptions'], 'additionalProperties': False}}},
-    {'type': 'function', 'function': {'name': 'draft_schedule', 'description': '读取真实任务与可用时间，调用 MCP 生成日程草案。只有可行才产生待采用草案。',
-     'parameters': {'type': 'object', 'properties': {}, 'additionalProperties': False}}},
+    {'type': 'function', 'function': {'name': 'draft_schedule', 'description': '读取真实任务和空闲时间生成日程草案。scope=mine只安排当前聊天成员，scope=all安排全组；只有可行才生成待采用草案。',
+     'parameters': {'type': 'object', 'properties': {'scope':{'type':'string','enum':['mine','all']}}, 'required':['scope'], 'additionalProperties': False}}},
 ]
 
 
@@ -29,6 +30,11 @@ def is_export_command(text):
         r'(?:请帮我|帮我|请)?(?:导出|下载)(?:当前|这个|本项目|项目)?(?:的)?'
         r'(?:计划|任务计划|项目计划|Markdown|markdown)(?:文件)?[。！! ]*', text.strip()
     ) is not None
+
+
+def is_team_assignment(text):
+    return bool(re.search(r'当前项目成员|项目成员|小组|团队|全组|我们', text)
+                and re.search(r'分工|拆分|拆解|分配|安排.{0,8}任务', text))
 
 
 def claims_exported_file(text):
@@ -50,10 +56,16 @@ class Runner:
         self.errors = []
         self.sources, self.search_calls, self.weather_calls = [], 0, 0
         self.on_progress = on_progress
+        self.display_names = {}
+        self.known_tasks = {}
+        self.known_members = []
+        if self.ctx['member_id']:
+            self.display_names[self.ctx['member_id']] = self.ctx['member_name']
 
     def model_identity(self):
         return {'source': 'server_session', 'speaker_member_id': self.ctx['member_id'],
                 'speaker_name': self.ctx['member_name'], 'default_task_assignee_id': self.ctx['member_id'],
+                'default_assignee_scope': '仅适用于未指定负责人的单项个人任务，不代表整个项目只有当前成员',
                 'self_reference': '用户说我、自己、本人、给我，均指speaker_member_id；成员姓名为“我”时不要当作代词。'}
 
     def model_tool_result(self, result):
@@ -65,7 +77,9 @@ class Runner:
                 {'member_id': m['id'], 'stored_name': m['name'],
                  'is_current_speaker': m['id'] == self.ctx['member_id'],
                  'refer_to_as': f"成员「{m['name']}」"} for m in data['members']]
-        return {**result, 'conversation_identity': identity}
+        return {**result, 'conversation_identity': identity,
+                'server_clock': clock_facts(now()),
+                'task_deadline_facts': deadline_facts(self.known_tasks.values(), now())}
 
     @staticmethod
     def action_label(action):
@@ -97,6 +111,16 @@ class Runner:
                  summary='尚未确认执行结果，请核对实际任务。')
             raise
         ok = result['ok']
+        if ok:
+            data = result.get('data')
+            if name == 'get_plan' and isinstance(data, dict):
+                self.known_members = data['members']
+                self.known_tasks = {t['id']: t for t in data['tasks']}
+                self.display_names.update({m['id']: m['name'] for m in data['members']})
+            elif name in ('list_tasks', 'create_tasks', 'update_task'):
+                tasks = data if isinstance(data, list) else [data]
+                self.known_tasks.update({t['id']: t for t in tasks if isinstance(t, dict) and 'deadline' in t})
+            self.display_names.update({t['id']: t['title'] for t in self.known_tasks.values()})
         if not ok:
             self.errors.append(result['error'])
         summary = '执行成功' if ok else result['error']['message']
@@ -162,19 +186,45 @@ class Runner:
         members = {m['id'] for m in plan['data']['members']}
         if any(t['assignee_id'] not in members for t in values):
             raise ValueError('草案负责人不属于当前项目')
+        if len(members)>1 and any(re.search(r'(?:当前|项目)(?:项目|中|内)?(?:只有|仅有|仅).{0,8}(?:一位|一名|1位|1名|一人|1人)(?:成员)?(?=[:：；;。.,，\s]|$)', a) for a in assumptions):
+            return error_result('MEMBER_FACT_CONFLICT', '当前项目实际有'+str(len(members))+'位成员：'
+                                +'、'.join(m['name'] for m in plan['data']['members'])
+                                +'。不能假定只有当前发言者，请根据真实名册重新生成分工草案。')
+        text=self.request.message
+        whole_team=re.search(r'(?:根据|按照|按|依据).{0,8}(?:项目成员|全组|全体成员|所有成员|每位成员)|全组分工|全员分工',text)
+        explicit_owner=any(len(m['name'])>1 and m['name'] in text for m in plan['data']['members']) or re.search(r'给我|交给我|由我|我来|自己负责',text)
+        if whole_team and not explicit_owner and len(members)>1 and len(values)>1 and len({t['assignee_id'] for t in values})==1:
+            return error_result('TEAM_ASSIGNMENT_COLLAPSED',
+                '用户要求按项目成员分工，没有指定所有任务给同一个人。当前成员：'
+                +'、'.join(m['name'] for m in plan['data']['members'])
+                +'。请保留任务、估时和截止，按工作量提出涉及多名成员的暂定分工，不要全部默认交给当前发言者；仍需用户确认。')
         draft = self.save_draft('tasks', values, assumptions)
         emit(self.on_progress, 'phase', '任务草案已生成，正在整理回复')
         return {'ok': True, 'data': draft, 'error': None}
 
-    async def draft_schedule(self):
-        result = await self.call('propose_schedule', {})
+    def schedule_assignee(self, scope):
+        if scope not in ('mine','all'):raise ValueError('请选择个人或全组安排。')
+        if scope=='mine' and not self.ctx['member_id']:raise ValueError('请先选择自己的姓名，再安排个人时间。')
+        return self.ctx['member_id'] if scope=='mine' else None
+
+    async def draft_schedule(self, scope='all'):
+        assignee=self.schedule_assignee(scope)
+        if self.ctx.get('draft') and self.ctx['draft']['type']=='schedule':
+            store.save_state(self.request.project_id,self.request.session_id,clear_draft=True)
+            self.ctx['draft']=None
+        result = await self.call('get_plan', {})
+        if not result['ok']:return result
+        result = await self.call('propose_schedule', {'assignee_id':assignee} if assignee else {})
         if not result['ok']:
             return result
         data = result['data']
         if not data['feasible'] or not data['blocks']:
             return result
-        self.save_draft('schedule', {'blocks': data['blocks'], 'expected_version': data['version']},
-                        ['按最早截止时间优先安排；允许任务拆段；只使用已保存的可用时间。'])
+        values={'blocks': data['blocks'], 'expected_version': data['version']}
+        if assignee:values['assignee_id']=assignee
+        self.save_draft('schedule', values,
+                        ['只调整当前成员的日程，保留其他成员安排。' if assignee else '本次安排全组日程。',
+                         '按最早截止时间优先安排；允许任务拆段；只使用已保存的可用时间。'])
         emit(self.on_progress, 'phase', '日程草案已生成，正在整理回复')
         return result
 
@@ -188,12 +238,14 @@ class Runner:
         stable_id = 'apply:' + self.request.session_id + ':' + draft['id']
         name = 'create_tasks' if draft['type'] == 'tasks' else 'save_schedule'
         args = {'tasks': draft['data']} if draft['type'] == 'tasks' else draft['data']
+        if name=='save_schedule' and args.get('assignee_id') not in (None,self.ctx['member_id']):
+            raise ValueError('这份个人日程属于其他成员，请切换到对应成员。')
         result = await self.call(name, args, stable_id)
         if not result['ok']:
             return '草案未保存：' + result['error']['message']
         store.save_state(self.request.project_id, self.request.session_id, clear_draft=True)
         self.ctx['draft'] = None
-        return f"已通过 MCP 保存 {len(result['data'])} 项任务。" if name == 'create_tasks' else '已通过 MCP 保存日程，可在日程页查看。'
+        return f"已保存 {len(result['data'])} 项任务。" if name == 'create_tasks' else ('我的日程已保存，可在“时间安排”查看。' if args.get('assignee_id') else '全组日程已保存，可在“时间安排”查看。')
 
     async def export(self, format='markdown'):
         result = await self.call('export_plan', {'format': format})
@@ -203,6 +255,23 @@ class Runner:
 
     async def handle_action(self, action):
         kind = action.get('type')
+        if kind=='generate_schedule' and not set(action)-{'type','scope'}:
+            scope=action.get('scope','mine')
+            result=await self.draft_schedule(scope)
+            if not result['ok']:return result['error']['message']
+            data=result['data']
+            if data['feasible'] and data['blocks']:
+                return ('我的' if scope=='mine' else '全组')+'日程草案已生成，请核对任务和时段，再点击“确认并保存”。'
+            if data['feasible']:return '当前范围没有未完成的任务，无需安排时间。'
+            names=project_display_names(self.request.project_id)
+            notes=[]
+            if data.get('overdue_tasks'):
+                notes.append('以下任务已过截止时间，请先确认新的截止时间：'+ '、'.join('「'+t['title']+'」' for t in data['overdue_tasks'])+'。')
+            if data.get('unavailable_assignees'):
+                notes.append('请先填写有效的未来空闲时段：'+'、'.join(names.get(mid,'成员') for mid in data['unavailable_assignees'])+'。')
+            gaps=data['missing_minutes_by_assignee']
+            if gaps:notes.append('仍未排下的任务用时：'+'；'.join(f"{names.get(mid,'成员')} {minutes}分钟" for mid,minutes in gaps.items())+'。')
+            return '暂时无法生成可采用的日程草案。\n\n'+'\n'.join(notes+data['conflicts'])
         if kind == 'export_plan' and not set(action) - {'type', 'format'}:
             return await self.export(action.get('format', 'markdown'))
         if kind == 'manage_member' and not set(action) - {'type', 'operation', 'member_id', 'name'} and 'operation' in action:
@@ -216,11 +285,14 @@ class Runner:
         if kind == 'update_task' and set(action) == {'type', 'task_id', 'patch'}:
             result = await self.call('update_task', {k: action[k] for k in ('task_id', 'patch')})
             return '任务已更新。' if result['ok'] else result['error']['message']
-        if kind == 'clear_schedule' and set(action) == {'type'}:
+        if kind == 'clear_schedule' and not set(action)-{'type','scope'}:
+            assignee=self.schedule_assignee(action.get('scope','all'))
             result = await self.call('get_plan', {})
             if result['ok']:
-                result = await self.call('save_schedule', {'blocks': [], 'expected_version': result['data']['version']})
-            return '已清空日程，任务和可用时间保留。' if result['ok'] else result['error']['message']
+                args={'blocks': [], 'expected_version': result['data']['version']}
+                if assignee:args['assignee_id']=assignee
+                result = await self.call('save_schedule', args)
+            return ('已清空我的日程，任务和空闲时间保留。' if assignee else '已清空全组日程，任务和空闲时间保留。') if result['ok'] else result['error']['message']
         raise ValueError('不支持的操作或多余参数')
 
     async def run(self):
@@ -348,7 +420,7 @@ class Runner:
             if search_available else
             '本轮未启用联网搜索（搜索密钥未配置、被关闭或配置无效）。需要网页检索时简短说明搜索尚未启用，不影响已启用的专用天气工具；'
             '主机在.env填写TAVILY_API_KEY并重启后可使用。这里是缺少可用搜索工具，不是没有接入模型API。')
-        system = f'''你是课伴 StudyMate，中文课业规划 Agent。当前北京时间 {now().isoformat()}。
+        system = f'''你是课伴 StudyMate，课程小组作业协作助手：帮助当前项目理解作业、确认分工、安排时间、跟进任务，并在提交前辅助交付检查。当前北京时间 {now().isoformat()}。
 你的主要职责是课业协作，同时可以自然闲聊、回答一般知识和学习问题。直接回应用户实际问题，不因为问题不是任务就拒绝，不强行转回规划作业，不反复罗列功能。口吻简洁自然。
 普通聊天、知识解释、询问产品能力或模型连接不需要查询项目、调用任务工具，也不需要询问负责人、截止时间或身份。只有用户要查询或改变实际业务数据时才使用相应工具；不要把闲聊或随口感叹自动保存为任务。
 {weather_policy}
@@ -359,6 +431,7 @@ class Runner:
 有明确聊天成员时，“我/我的/给我”指该成员；查询“我的任务”必须按其 assignee_id 筛选，创建“给我”的任务使用其真实 ID。处理需要个人归属的任务但未指定成员时先询问身份，不推测；普通聊天不询问身份。“它”只能指当前成员会话的焦点。成员视角用于指代和默认筛选；项目任务仍共享，可以按明确要求协作处理其他成员任务。
 关键消歧：项目中的真实姓名可能恰好叫“我”。工具结果中的 name="我" 是一位成员的字面姓名，不能因此把他称为当前用户或“您”。例如当前聊天成员是甲、另一位姓名为“我”，用户说“给我/给自己”时负责人只能是甲；只有明确说“给名为我/姓名为我/成员我/另一位成员”才指那位姓名为“我”的成员。
 用户明确要求创建单项任务但没有指定负责人时，默认分配给当前聊天成员，不再问“给您还是给甲”。缺截止日期或时刻时只问缺少的时间，不要重复询问已由会话确定的身份或负责人。小组批量拆解仍按用户确认的分工安排，不强制全部归给当前成员。旧回复若曾混淆身份，以本次服务端绑定为准纠正，不沿用错误称呼。正常回复使用姓名，不罗列内部member_id/task_id，除非需要同名消歧或用户主动要求。
+作业自查通过get_review_workspace读取已保存的老师要求和材料；未保存时引导用户到首页添加。自查需逐字引用原要求和材料，可通过record_review_analysis保存当前版本的建议，不得伪造依据。找到文字不代表合格，不替老师评分，也不能读图片或做OCR。用户需在自查页面人工复核后才能使用create_review_task创建补充任务，且必须明确确认负责人、截止时间和估时。
 当前会话只属于所选项目。其他小组项目的任务、成员、偏好和指代不能带入；如需处理其他项目，请用户在页面切换项目。
 任务事实必须查真实工具，禁止假报执行成功，工具 ok:false 必须说明失败。不要输出隐藏推理。
 当前会话焦点 task_id={self.ctx['focus_id']}，焦点只用于“它”的唯一指代。多个候选必须澄清。
@@ -367,6 +440,9 @@ class Runner:
 课程项目的交付必须能演示真实模型和真实工具执行；拆解时不得建议用 mock/模拟工具调用代替最终交付。当前产品支持实时执行进度但不支持逐字生成正文，不能擅自将逐字流式回复、额外模型训练等加入用户没有要求的最小任务范围。
 用户明确要求直接创建某项任务可 create_tasks。用户“采用”由应用处理。不要自行采用草案。
 排程用 draft_schedule；不可直接保存非空日程。容量不足如实报缺口，不得删任务或自行捏造空闲时间。
+个人安排规则：用户说“安排我的时间/我的任务/我什么时候做”时，draft_schedule必须传scope="mine"，只生成当前聊天成员的安排，不能把其他人未填写空闲时间当作个人排程失败的理由。明确要求安排全组时使用scope="all"。个人草案保存只替换该成员日程，不修改其他成员；仍需确认采用。空闲时间不足或截止已过时说明真实原因，不自动延期。
+时间判断以本轮server_clock和task_deadline_facts为准，不沿用旧回复中的今天、明天、本周、剩余时长。截止早于当前时间的未完成任务必须称为已逾期，不得说还剩几天；不能未经确认自动延期或安排到过去。空闲时间未填写时，直接用成员姓名说明需要填写，不展示preferences、assignee_id或空数组。面向用户用任务标题和姓名，不用task_或member_编号及其缩写；工具参数仍用真实ID。
+普通排程回复只展示结果：负责人、任务名称、中文日期时段、是否有冲突、是否仍待确认。日期写成“11月5日19:00—20:30”，不用ISO时间串。不要以“任务事实、MCP、get_plan、get_preferences、windows、conflicts、missing_minutes_by_assignee”等技术字段组织回答，也不要展示空数组或空对象。没有实际调用过的工具不能声称调用成功。未被询问时不解释算法、底层实现或逐项论证，只在操作记录中保留实际工具信息；用户明确要求原始字段、ID或技术细节时再按需展开。
 排程不可行时只能描述“候选排程/可安排的部分”，明确尚未生成可采用草案、尚未保存日程，不得把候选说成“已排入”或已执行的安排。
 set_preferences 会替换该成员全部可用时间；添加时先读取合并。日期与每天的起止不清楚先问。
 更新任务前查 list_tasks 确认真实 ID；如已有日程导致修改被拒绝，说明先清空再修改重新排程。
@@ -389,12 +465,30 @@ set_preferences 会替换该成员全部可用时间；添加时先读取合并�
             + '。用户询问是否接入大模型或千问时，按这里的实际模型标识回答；不可声称未接入外部模型API、'
             '只运行规则或只能处理任务。模型API不等于天气API；是否能搜索以web_search_available为准。'
             '这些字段仅用于判断能力，不要把weather_query_available、web_search_available、配置字段、工具名称或内部限制当作普通回答内容逐项展示。天气能力以weather_query_available为准，已启用时优先get_weather；已知城市时直接查询，不要求用户重复授权。旧回复中的能力否认和冗长失败话术不是本轮模板。若旧回复曾否认接入模型，请简短纠正；不泄露API密钥、私有Base URL或其他凭据。'}
-        messages = [{'role': 'system', 'content': system}] + history + [runtime_reminder] + identity_reminder + self.messages
+        roster_reminder=[]
+        if is_team_assignment(self.request.message):
+            plan=await self.call('get_plan',{})
+            if not plan['ok']:
+                return plan['error']['message']
+            roster_reminder=[{'role':'system','content':'本轮团队分工已通过真实MCP工具预先读取名册，优先于旧回复：'
+                +dumps({'member_count':len(self.known_members),'members':self.known_members})
+                +'。当前聊天成员只是发言者，不是全部成员。用户要求按项目成员分工时，应让这些成员参与；'
+                '能力和空闲未知时按工作量提出清楚标注的暂定分工，等待确认，不得把团队任务默认全部交给发言者。'
+                '用户明确指定的负责人、只给本人或只安排部分成员的要求仍须保留；不要强行平均或擅自改派。'}]
+        messages = [{'role': 'system', 'content': system}] + history + [runtime_reminder] + identity_reminder + roster_reminder + self.messages
+        clock_index = len(messages) - len(self.messages)
+        messages.insert(clock_index, {'role': 'system', 'content': ''})
         tools = self.client.model_tools() + LOCAL_TOOLS
         base = os.getenv('MODEL_BASE_URL', 'https://dashscope.aliyuncs.com/compatible-mode/v1').rstrip('/')
         rounds = min(max(int(os.getenv('AGENT_MAX_ROUNDS', '8')), 1), 12)
         async with httpx.AsyncClient(timeout=float(os.getenv('MODEL_TIMEOUT', '45'))) as http:
             for _ in range(rounds):
+                # Refresh after historical/tool messages and on every model round.
+                clock_reminder = {'role': 'system', 'content': '本轮服务端时间事实（高于旧聊天中的相对日期和倒计时）：' + dumps({
+                    'server_clock': clock_facts(now()),
+                    'task_deadline_facts': deadline_facts(self.known_tasks.values(), now())})
+                    + '。直接使用程序计算的time_label；已逾期不能说尚未截止。回复使用任务标题和成员姓名，内部ID仅用于工具参数。'}
+                messages[clock_index] = clock_reminder
                 emit(self.on_progress, 'phase', '正在整理工具结果并生成回复' if self.events else '正在分析你的需求')
                 response = await http.post(base + '/chat/completions', headers={'Authorization': f'Bearer {key}'},
                     json={'model': model_name, 'messages': messages, 'tools': tools, 'temperature': 0.2})
@@ -409,7 +503,9 @@ set_preferences 会替换该成员全部可用时间；添加时先读取合并�
                 if not msg.get('tool_calls'):
                     if not self.download and claims_exported_file(msg['content']):
                         raise BusinessError('EXPORT_NOT_EXECUTED', '本次未实际生成下载文件。请点击顶部“导出计划”，系统会执行导出并提供下载链接。')
-                    return msg['content'] or '模型没有返回有效回复，请补充需求后再试。'
+                    if re.search(r'\b(?:task|member)_[A-Za-z0-9]+', msg['content']):
+                        self.display_names.update(project_display_names(self.request.project_id))
+                    return readable_reply(msg['content'], self.display_names, self.request.message or '') or '模型没有返回有效回复，请补充需求后再试。'
                 for call in msg['tool_calls']:
                     name = call['function']['name']
                     try:
@@ -420,9 +516,7 @@ set_preferences 会替换该成员全部可用时间；添加时先读取合并�
                         elif name == 'draft_tasks':
                             result = await self.draft_tasks(**args)
                         elif name == 'draft_schedule':
-                            if args:
-                                raise ValueError('draft_schedule 不接受参数')
-                            result = await self.draft_schedule()
+                            result = await self.draft_schedule(**args)
                         elif name == 'save_schedule' and args.get('blocks'):
                             result = error_result('DRAFT_REQUIRED', '非空日程必须先生成草案，等待用户采用。')
                         else:

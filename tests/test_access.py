@@ -55,9 +55,9 @@ class Chunks(httpx.AsyncByteStream):
 
 
 @contextmanager
-def gateway(monkeypatch, handler):
+def gateway(monkeypatch, handler, public='1'):
     import backend.share_gateway as module
-    monkeypatch.setenv('STUDYMATE_PUBLIC','1'); monkeypatch.setenv('STUDYMATE_ACCESS_PASSWORD',PASSWORD)
+    monkeypatch.setenv('STUDYMATE_PUBLIC',public); monkeypatch.setenv('STUDYMATE_ACCESS_PASSWORD',PASSWORD)
     real_client = httpx.AsyncClient
     monkeypatch.setattr(module.httpx, 'AsyncClient', lambda **kw: real_client(transport=httpx.MockTransport(handler), **kw))
     with TestClient(module.app, base_url='https://test.example.com') as client:
@@ -128,3 +128,55 @@ def test_gateway_cannot_start_without_access_protection(monkeypatch):
     monkeypatch.setenv('STUDYMATE_PUBLIC', '0'); monkeypatch.delenv('STUDYMATE_ACCESS_PASSWORD', raising=False)
     with pytest.raises(RuntimeError, match='必须配置'):
         with TestClient(app): pass
+
+
+@pytest.mark.parametrize('method',['PUT','PATCH','DELETE','OPTIONS'])
+def test_lan_gateway_authenticates_all_methods_and_preserves_writes(monkeypatch,method):
+    monkeypatch.setenv('STUDYMATE_LAN_HOST','192.168.50.10')
+    received=[]
+    def handler(request):
+        received.append(request)
+        return httpx.Response(200,stream=Chunks([b'{"ok":true}']),headers={'content-type':'application/json'})
+    url='http://192.168.50.10/api/review/project_sample/instructions'
+    with gateway(monkeypatch,handler) as client:
+        assert client.request(method,url,json={'text':'test'}).status_code==401
+        assert not received
+        response=client.request(method,url,json={'text':'test'},headers={'Authorization':basic()})
+        assert response.status_code==200
+        assert received[-1].method==method and received[-1].url.host=='127.0.0.1'
+        assert __import__('json').loads(received[-1].content)=={'text':'test'}
+        assert 'authorization' not in received[-1].headers
+        assert client.get('http://other.example.com/',headers={'Authorization':basic()}).status_code==400
+
+
+@pytest.mark.parametrize('host',['0.0.0.0','127.0.0.1','8.8.8.8','169.254.1.1','localhost'])
+def test_lan_gateway_refuses_public_or_unspecified_bind_address(monkeypatch,host):
+    from backend.share_gateway import app
+    monkeypatch.setenv('STUDYMATE_PUBLIC','1');monkeypatch.setenv('STUDYMATE_ACCESS_PASSWORD',PASSWORD)
+    monkeypatch.setenv('STUDYMATE_LAN_HOST',host)
+    with pytest.raises(RuntimeError,match='内网IPv4'):
+        with TestClient(app):pass
+
+
+@pytest.mark.parametrize('method',['GET','POST','PUT','PATCH','DELETE'])
+def test_lan_no_login_mode_allows_shared_operations_only_on_configured_private_host(monkeypatch,method):
+    monkeypatch.setenv('STUDYMATE_PUBLIC','0');monkeypatch.delenv('STUDYMATE_ACCESS_PASSWORD',raising=False)
+    monkeypatch.setenv('STUDYMATE_LAN_HOST','192.168.50.10');monkeypatch.setenv('STUDYMATE_LAN_NO_AUTH','1')
+    received=[]
+    def handler(request):
+        received.append(request)
+        return httpx.Response(200,stream=Chunks([b'{"ok":true}']))
+    with gateway(monkeypatch,handler,public='0') as client:
+        result=client.request(method,'http://192.168.50.10/api/projects',json={'test':'data'})
+        assert result.status_code==200 and 'www-authenticate' not in result.headers
+        assert received[-1].method==method and 'authorization' not in received[-1].headers
+        assert client.get('http://public.example/').status_code==400
+
+
+@pytest.mark.parametrize('lan,public',[('', '0'),('', '1'),('192.168.50.10','1')])
+def test_no_login_flag_cannot_disable_public_gateway_auth(monkeypatch,lan,public):
+    from backend.share_gateway import app
+    monkeypatch.setenv('STUDYMATE_LAN_NO_AUTH','1');monkeypatch.setenv('STUDYMATE_LAN_HOST',lan)
+    monkeypatch.setenv('STUDYMATE_PUBLIC',public)
+    with pytest.raises(RuntimeError,match='免登录仅适用于'):
+        with TestClient(app):pass

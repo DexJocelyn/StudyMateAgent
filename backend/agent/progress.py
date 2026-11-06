@@ -1,5 +1,6 @@
 """面向用户的执行状态；仅来自实际处理阶段，不包含模型内部推理。"""
 TOOL_LABELS = {
+    'get_review_workspace':'读取作业与材料', 'record_review_analysis':'保存自查建议', 'create_review_task':'创建补充任务',
     'get_weather': '查询城市天气',
     'web_search': '联网搜索公开网页',
     'get_plan': '查询项目状态', 'list_tasks': '查询任务', 'create_tasks': '保存任务',

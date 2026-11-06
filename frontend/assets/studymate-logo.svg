@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="160" viewBox="0 0 640 160">
+<rect width="640" height="160" rx="16" fill="#F0F5F1"/>
+<path d="M32 38 Q64 28 94 46 L94 126 Q64 108 32 118 Z" fill="#FFFFFF" stroke="#245A46" stroke-width="4"/>
+<path d="M94 46 Q124 28 156 38 L156 118 Q124 108 94 126 Z" fill="#FFFFFF" stroke="#245A46" stroke-width="4"/>
+<path d="M66 78 L86 98 L126 58" fill="none" stroke="#397958" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+<g font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif"><text x="196" y="74" fill="#245A46" font-size="42" font-weight="bold">课伴 StudyMate</text><text x="198" y="115" fill="#5F7066" font-size="20">从分工到提交，让小组把作业交完整</text></g>
+</svg>

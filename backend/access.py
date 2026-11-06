@@ -46,5 +46,5 @@ def load_access_config():
 
 def unauthorized_response():
     return JSONResponse(status_code=401,
-        content={'ok': False, 'error': {'code': 'AUTH_REQUIRED', 'message': '请使用组长提供的小组访问账号和密码登录。'}},
+        content={'ok': False, 'error': {'code': 'AUTH_REQUIRED', 'message': '请使用主机提供的小组访问账号和密码登录。'}},
         headers={'WWW-Authenticate': 'Basic realm="StudyMate", charset="UTF-8"', 'Cache-Control': 'no-store'})

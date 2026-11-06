@@ -33,8 +33,16 @@ def prepare():
 def main():
     parser = argparse.ArgumentParser(description='在本机创建环境并启动课伴。')
     parser.add_argument('--share', action='store_true', help='开启有访问密码的免费临时公网链接')
+    parser.add_argument('--configure', action='store_true', help='配置本机模型后退出，不发送模型请求')
     args = parser.parse_args()
     os.chdir(ROOT)
+    if args.configure:
+        from configure_model import configure
+        configure(ROOT)
+        return
+    if not (ROOT / '.env').exists():
+        from configure_model import configure
+        configure(ROOT)
     python = prepare()
     if args.share:
         command = [str(python), str(ROOT / 'scripts/share_public.py')]
@@ -49,5 +57,7 @@ def main():
 
 if __name__ == '__main__':
     try: main()
-    except (RuntimeError, OSError, subprocess.CalledProcessError) as exc:
+    except (RuntimeError, ValueError, OSError, subprocess.CalledProcessError) as exc:
         raise SystemExit(str(exc))
+    except (EOFError, KeyboardInterrupt):
+        raise SystemExit('\n已取消启动。')

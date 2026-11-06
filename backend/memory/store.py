@@ -45,11 +45,15 @@ def load_context(project_id, session_id, member_id=None):
 
 def display_context(project_id, session_id, member_id=None):
     ctx = load_context(project_id, session_id, member_id)
+    from backend.agent.presentation import readable_reply, project_display_names
+    names = project_display_names(project_id)
     visible = []
     for turn in ctx['history']:
+        question = next((m.get('content', '') for m in turn['messages'] if m['role'] == 'user'), '')
         for msg in turn['messages']:
             if msg['role'] in ('user', 'assistant') and msg.get('content') and not msg.get('tool_calls'):
-                visible.append({'role': msg['role'], 'content': msg['content'],
+                content = readable_reply(msg['content'], names, question) if msg['role'] == 'assistant' else msg['content']
+                visible.append({'role': msg['role'], 'content': content,
                                 'member_id': turn.get('member_id'), 'member_name': turn.get('member_name')})
         if turn.get('events'):
             visible.append({'role': 'events', 'events': turn['events']})

@@ -2,34 +2,47 @@
 <html lang="zh-CN">
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="theme-color" content="#f7f8fa"><title>课伴 · 任务与日程</title>
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23334155'/%3E%3Cpath d='M9 10h14M9 16h10M9 22h6' stroke='white' stroke-width='3'/%3E%3C/svg%3E">
-  <link rel="stylesheet" href="/static/styles.css?v=20261024-weather"><script type="module" src="/static/app.js?v=20261024-weather"></script>
+  <meta name="theme-color" content="#f7f8fa"><title>课伴 · 小组作业协作</title>
+  <link rel="icon" type="image/svg+xml" href="/static/assets/studymate-mark.svg?v=20261106-logo">
+  <link rel="stylesheet" href="/static/styles.css?v=20261105-projects"><script type="module" src="/static/app.js?v=20261105-projects"></script>
+  <link rel="stylesheet" href="/static/assets/branding.css?v=20261106-logo">
 </head>
 <body>
   <main>
-    <header class="app-header"><div class="brand"><h1>课伴</h1><span>任务与日程</span></div><nav aria-label="项目操作"><button class="button secondary" id="nav-members">成员</button><button class="button secondary" id="nav-prefs">设置空闲时间</button><button class="button secondary" id="nav-export">导出计划</button><button class="button secondary" id="new-session">新建对话</button></nav></header>
-    <div class="project-bar"><label for="project-select">当前项目</label><select id="project-select" aria-label="切换项目"><option value="project_demo">软件工程 · 课伴项目</option></select><button class="text-button" id="new-project">新建项目</button></div>
-    <div class="identity-bar"><label for="current-member">当前聊天成员</label><select id="current-member" aria-label="切换聊天成员"><option value="">请选择你的姓名</option></select><span id="identity-note">选择成员后再与 AI 对话</span></div>
-    <div class="mode-banner" id="mode-banner"><span id="mode-text">正在连接…</span></div>
+    <header class="app-header"><div class="brand"><img class="brand-mark" src="/static/assets/studymate-mark.svg?v=20261106-logo" width="44" height="40" alt=""><div class="brand-copy"><h1>课伴 <small>StudyMate</small></h1><span>帮小组分工、安排时间、检查作业</span></div></div><details class="settings-menu"><summary>项目设置</summary><nav aria-label="项目操作"><button class="button secondary" id="nav-members">管理成员</button><button class="button secondary" id="nav-prefs">填写空闲时间</button><button class="button secondary" id="nav-export">下载任务计划</button><button class="button secondary" id="new-session">重新开始对话</button><a id="nav-delivery" class="button secondary" href="/review">检查作业</a></nav></details></header>
+    <div class="project-bar"><label for="project-select">当前项目</label><select id="project-select" aria-label="切换项目"><option value="project_demo">软件工程 · 课伴项目</option></select><button class="text-button" id="new-project">新建项目</button><button class="text-button" id="manage-projects">管理项目</button></div>
+    <section class="project-journey" aria-label="当前项目工作流程">
+      <h2>你现在想做什么？</h2><p class="simple-intro">分配小组作业选“帮小组分工”；接到任务后，选“安排我的时间”。</p>
+      <div class="simple-actions"><button type="button" id="project-collaborate"><strong>帮小组分工</strong><span>把作业拆成任务，确定谁来做</span></button><button type="button" id="project-schedule"><strong>安排我的时间</strong><span>接到任务后，按自己的空闲时段安排</span></button><a id="project-delivery" href="/review"><strong>检查作业</strong><span>上传已有材料，看看还缺什么</span></a></div>
+      <details class="delivery-details"><summary>已保存的作业要求与检查进度</summary><h3 id="workspace-project-name">正在加载项目…</h3><p id="delivery-status" role="status">正在读取…</p><a id="project-instructions" href="/review">查看或保存老师要求</a><button type="button" id="prepare-from-requirements" class="text-button">把已保存要求放进对话</button></details>
+    </section>
+    <div class="identity-bar"><label for="current-member">你是谁</label><select id="current-member" aria-label="切换聊天成员"><option value="">请选择你的姓名</option></select><span id="identity-note">选择成员后再与 AI 对话</span></div>
     <section class="work-grid">
-      <section class="chat-panel panel" aria-label="智能体对话">
-        <div class="panel-header"><h2 id="chat-title">对话</h2><span class="muted" id="chat-mode">连接中</span></div>
+      <section class="chat-panel panel" id="chat-panel" aria-label="智能体对话">
+        <div class="panel-header"><h2 id="chat-title">对话</h2><div class="chat-header-actions"><span class="muted" id="chat-mode">连接中</span><button type="button" id="expand-chat" class="button secondary" aria-expanded="false" aria-controls="chat-panel" title="放大对话，暂时收起任务面板">展开对话</button></div></div>
         <div class="chat-stream" id="chat-stream" aria-live="polite"></div><div id="draft-container"></div>
-        <div class="quick-actions"><button data-prompt="拆解演示作业">拆解示例作业</button><button data-prompt="安排日程">安排日程</button></div>
-        <form id="chat-form" class="composer"><label class="sr-only" for="message">输入作业或指令</label><textarea id="message" rows="3" maxlength="20000" placeholder="输入作业要求，或说出要创建、修改的任务"></textarea>
+        <details class="chat-tools"><summary>常用指令</summary><div class="quick-actions"><button data-prompt="拆解演示作业">拆解示例作业</button><button data-prompt="安排日程">安排日程</button></div></details>
+        <form id="chat-form" class="composer"><label class="sr-only" for="message">输入作业或指令</label><textarea id="message" rows="2" maxlength="20000" placeholder="输入作业要求，或说出要创建、修改的任务"></textarea>
           <div id="voice-panel" class="voice-panel" hidden><div class="voice-heading"><span id="voice-status" role="status">语音输入</span><span id="voice-time" aria-label="本次聆听时长">00:00</span></div><p id="voice-hint"></p><p id="voice-preview" hidden></p></div>
           <div class="composer-bottom"><div><button type="button" id="mic" class="text-button" aria-label="开始中文语音输入" aria-pressed="false">语音输入</button><button type="button" id="pause-mic" class="text-button" hidden>暂停</button><button type="button" id="stop-speech" class="text-button">停止朗读</button></div><button id="send" class="button primary" type="submit">发送</button></div></form>
         <div class="composer-note" id="input-note">Enter 发送 · Shift + Enter 换行</div><button id="retry" class="retry-button" hidden>连接中断，重试同一请求</button>
       </section>
+      <div id="chat-divider" class="chat-divider" role="separator" tabindex="0" aria-label="调整对话和任务宽度" aria-orientation="vertical" aria-controls="chat-panel" aria-valuemin="40" aria-valuemax="70" aria-valuenow="60" title="左右拖动调整宽度；双击恢复；方向键微调"></div>
       <section class="board-panel panel" aria-label="项目任务与日程">
-        <div class="panel-header"><div class="tabs" role="tablist"><button role="tab" aria-selected="true" class="tab active" data-tab="tasks">任务 <span id="task-count">0</span></button><button role="tab" aria-selected="false" class="tab" data-tab="schedule">日程</button></div><button class="text-button" id="refresh" aria-label="刷新真实数据">刷新</button></div>
+        <div class="panel-header"><div class="tabs" role="tablist"><button role="tab" aria-selected="true" class="tab active" data-tab="tasks"><span id="task-tab-label">我的任务</span> <span id="task-count">0</span></button><button role="tab" aria-selected="false" class="tab" data-tab="schedule">时间安排</button></div><button class="text-button" id="refresh" aria-label="刷新真实数据">刷新</button></div>
+        <div class="board-scope"><div role="group" aria-label="查看任务范围"><button type="button" id="view-mine" aria-pressed="false">我的</button><button type="button" id="view-team" aria-pressed="false">全组</button></div><span id="scope-note"></span></div>
         <div class="task-summary" aria-label="项目统计"><span>共 <strong id="stat-all">0</strong> 项</span><span>进行中 <strong id="stat-doing">0</strong></span><span>完成 <strong id="stat-done">0</strong></span><span>剩余预计 <strong id="stat-hours">0</strong> 小时</span></div>
-        <div class="board-filters"><div class="status-filters" id="status-filters"><button data-status="all" class="selected">全部</button><button data-status="todo">待开始</button><button data-status="doing">进行中</button><button data-status="paused">已暂停</button><button data-status="done">已完成</button></div><select id="member-filter" aria-label="按成员筛选"><option value="">所有成员</option></select></div>
+        <details class="filter-options"><summary>筛选任务</summary><div class="board-filters"><div class="status-filters" id="status-filters"><button data-status="all" class="selected">全部</button><button data-status="todo">待开始</button><button data-status="doing">进行中</button><button data-status="paused">已暂停</button><button data-status="done">已完成</button></div><select id="member-filter" aria-label="按成员筛选"><option value="">所有成员</option></select></div></details>
         <div class="board-body" id="board-body"></div><div class="board-footer"><span id="sync-status">等待同步</span><span id="schedule-version">日程 v0</span></div>
       </section>
     </section>
+    <details class="connection-details"><summary>连接状态</summary><div class="mode-banner" id="mode-banner"><span id="mode-text">正在连接…</span></div></details>
   </main>
+  <dialog id="project-manager" aria-labelledby="project-manager-title"><div class="dialog-header"><h2 id="project-manager-title">管理项目</h2><button type="button" class="icon-button" id="close-project-manager" aria-label="关闭项目管理">×</button></div>
+    <p class="muted">归档会从常用列表收起项目，任务、日程和对话保留，可随时恢复。</p><p class="dialog-note">项目由当前主机共享，重命名和归档会影响组员看到的项目列表。归档用于整理列表，不是锁定访问。</p>
+    <div class="project-manager-filters"><label class="sr-only" for="project-search">搜索项目</label><input id="project-search" type="search" placeholder="搜索项目名称"><label class="sr-only" for="project-archive-filter">项目状态</label><select id="project-archive-filter"><option value="active">在用项目</option><option value="archived">已归档</option><option value="all">全部项目</option></select></div>
+    <p class="muted" id="project-manager-count" role="status"></p><div id="project-manager-list"></div>
+  </dialog>
   <dialog id="project-dialog"><form id="project-form">
     <div class="dialog-header"><h2>新建项目</h2><button type="button" class="icon-button" id="close-project" aria-label="关闭新建项目">×</button></div>
     <p class="muted">先填你自己，再添加一起做作业的同学。之后也可以随时调整。</p>
